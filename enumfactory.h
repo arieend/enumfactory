@@ -10,14 +10,12 @@
  *       Revision:  none
  *       Compiler:  gcc
  *
- *         Author:  YOUR NAME (), 
- *   Organization:  
+ *         Author:  Arie E. 
  *
  * =====================================================================================
  */
 #ifndef  __ENUMFACTORY_H__
 #define  __ENUMFACTORY_H__
-
 
 /*-----------------------------------------------------------------------------
  *  
@@ -54,7 +52,7 @@
 /* Definition for total number of enum members  */
 #define ENUM_TOTAL(_) _ ## _total
 
-/* Generate enumaration table with addional value ( XXXXX_total ) as total of enumarator's members */
+/* Generate enumeration table with addional value ( XXXXX_total ) as total of enumarator's members */
 #define _generate_enums(_enum, _generator) \
 typedef enum _ ## _enum \
              { \
@@ -82,7 +80,7 @@ __attribute__((unused)) static const T _enum ## _ ## _suffix[ENUM_TOTAL(_enum)] 
 #define ENUMS(_enum, _generator)                                          _generate_enums(_enum, _generator)
 #define ENUMS_ARRAY(_enum, _array_type, _array_suffix, _array_generator)  _generate_enums_array(_enum, _array_type, _array_suffix, _array_generator)
 
-/* Generetor for enums and enum's map   */
+/* Generator for enums and enum's map   */
 #define ENUMS_MAP(_enum, _enum_generator, _array_type, _array_suffix, _array_generator) \
         ENUMS(_enum, _enum_generator ) \
         ENUMS_ARRAY(_enum, _array_type, _array_suffix, _array_generator)
