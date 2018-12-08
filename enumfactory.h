@@ -21,33 +21,40 @@
 
 /*-----------------------------------------------------------------------------
  *  
- * Base enum  facory definitions  
+ * Base enum definitions  
  *
  *-----------------------------------------------------------------------------*/
 
-/* Single enumerator's member */
+/* Enumerator's member */
 #define ENUM(_,...) _
 
-/* Single enumerator as array index   */
+/* Enumerator as array index   */
 #define ENUM_INDEX(_,...) [_] 
 
-/* Single enumerator's member  as string */
+/* Enumerator's member  as string */
 #define ENUM_STRING(_,...) #_ 
 
-/* Single enumerator's member with custom value */
+/* Enumerator's member with custom value */
 #define ENUM_VALUE_ASSIGN(_, _v,...)  _= _v
 
-#define ENUM_VALUE_MAP(_,_v,...)  ENUM_VALUE_ASSIGN(ENUM_INDEX(_), _v)
-/* Single enumerator's memeber to value string  hash realation  */
+/*-----------------------------------------------------------------------------
+ *  
+ *  Enum implementation
+ *
+ *-----------------------------------------------------------------------------*/
+/* Enumerator's member to value hash realation  */
+#define ENUM_VALUE_MAP(_,_v,...)  ENUM_VALUE_ASSIGN(ENUM_INDEX(_), _v) /* [ENUM] = VALUE */
 
+/* Enumerator's member to value hash realation as a string */
 #define ENUM_STRING_VALUE_MAP(_, _v,...)  ENUM_VALUE_ASSIGN(ENUM_INDEX(_),ENUM_STRING(_v))  /* [ENUM]="VALUE" */
 
-#define ENUM_STRING_SELF_MAP(_,...)       ENUM_STRING_VALUE_MAP(_,_)
+/* Map enumerator's member to its self as desrtiption */ 
+#define ENUM_STRING_SELF_MAP(_,...)  ENUM_STRING_VALUE_MAP(_,_) /* [ENUM]="ENUM" */
 
-/*  Definition for total number of enum members  */
+/* Definition for total number of enum members  */
 #define ENUM_TOTAL(_) _ ## _total
 
-/*  Generate enumaration table with addional value ( XXXXX_total ) as total of enumarator's members */
+/* Generate enumaration table with addional value ( XXXXX_total ) as total of enumarator's members */
 #define _generate_enums(_enum, _generator) \
 typedef enum _ ## _enum \
              { \
@@ -68,7 +75,7 @@ __attribute__((unused)) static const T _enum ## _ ## _suffix[ENUM_TOTAL(_enum)] 
 
 /*-----------------------------------------------------------------------------
  *  
- *  Genrator implementaion
+ *  Arrays' genrator
  *
  *-----------------------------------------------------------------------------*/
 /* Base generators  */
