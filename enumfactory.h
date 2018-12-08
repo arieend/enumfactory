@@ -73,7 +73,7 @@ __attribute__((unused)) static const T _enum ## _ ## _suffix[ENUM_TOTAL(_enum)] 
 
 /*-----------------------------------------------------------------------------
  *  
- *  Arrays' genrator
+ *  Arrays' generator
  *
  *-----------------------------------------------------------------------------*/
 /* Base generators  */
