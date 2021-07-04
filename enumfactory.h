@@ -86,15 +86,17 @@ __attribute__((unused)) static const T _enum ## _ ## _suffix[ENUM_TOTAL(_enum)] 
         ENUMS_ARRAY(_enum, _array_type, _array_suffix, _array_generator)
 
 
-#define ENUMS_BASE(_, _enum_generator) ENUMS_MAP(_, _enum_generator,  char*, label, ENUM_STRING_SELF_MAP)
 /*  
  *
  *  Generaye enums and array like XXXX_label[enum] = "enum"
  *
+ *  ENUM_AUTOMATIC - Automatic enumarators valus        ex.: enum { ENUM0, ENUM1, ENUM2,... } 
+ *  ENUM_ASSIGNED  - Assign value to every enum member  ex.: enum { ENUM0=10, ENUM1=20, ENUM2=30, ....} 
  */
+#define ENUMS_BASE(_, _enum_generator) ENUMS_MAP(_, _enum_generator,  char*, label, ENUM_STRING_SELF_MAP)
 
-#define ENUMS_REGULAR(_) ENUMS_BASE(_, ENUM)
-#define ENUMS_ASIGNED(_) ENUMS_BASE(_, ENUM_VALUE_ASSIGN)
+#define ENUMS_AUTOMATIC(_) ENUMS_BASE(_, ENUM)               
+#define ENUMS_ASSIGNED(_)  ENUMS_BASE(_, ENUM_VALUE_ASSIGN)  
 
 
 
