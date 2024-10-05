@@ -26,11 +26,8 @@
         _(TEST2, 30), \
         _(TEST3, 40)
 
-
-
 /* ENUMS_AUTOMATIC(ENUM_TEST)
  */
- 
 
 ENUMS_ASSIGNED(ENUM_TEST)
 
