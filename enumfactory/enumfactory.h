@@ -17,7 +17,7 @@
 #ifndef  __ENUMFACTORY_H__
 #define  __ENUMFACTORY_H__
 
-#include "enumfactorymacros.h"
+#include "include/enumfactorymacros.h"
 
 int printEnumLabels(int total, const char **array); 
 

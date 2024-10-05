@@ -1,8 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "enumfactory.h"
-
 int printEnumLabels( int total,const char **array ) {
    
    for (int i = 0; i < total; i++)

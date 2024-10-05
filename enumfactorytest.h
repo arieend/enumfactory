@@ -19,7 +19,7 @@
 #ifndef   __ENUMFACTORYTEST_H__
 #define   __ENUMFACTORYTEST_H__
 
-#include "enumfactory.h"
+#include <enumfactory.h>
 
 #define ENUM_TEST(_)  \
         _(TEST1, 20), \
