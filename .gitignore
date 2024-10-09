@@ -66,5 +66,7 @@ CMakeUserPresets.json
 
 build/
 bin/
+.idea/
+.vscode/
 
 [Bb][Uu][Ii][Ll][Dd]/
