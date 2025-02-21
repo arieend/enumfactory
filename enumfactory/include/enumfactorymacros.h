@@ -80,18 +80,14 @@
 /* Generate enumeration table with additional value (XXXXX_total) as total of enumerator's members */
 #define _generate_enums(_enum, _generator) \
 typedef enum { \
-    _enum(_generator) \
+    _enum(_generator), \
     ENUM_TOTAL(_enum) \
-} _enum;
+} _enum
 
 /* Generate array of values where every enumerator member is the index */
 #define _generate_enums_array(_enum, T, _suffix, _generator)  \
 static const T _enum ## _ ## _suffix[ENUM_TOTAL(_enum)] = { \
     _enum(_generator) \
-    NULL \
-}; \
-static inline T _enum ## _get_ ## _suffix(_enum value) { \
-    return ENUM_IS_VALID(_enum, value) ? _enum ## _ ## _suffix[value] : NULL; \
 }
 
 /*-----------------------------------------------------------------------------

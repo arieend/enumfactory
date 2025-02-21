@@ -25,7 +25,7 @@
     GENERATOR(GREEN), \
     GENERATOR(BLUE)
 
-ENUMS_AUTOMATIC(COLOR)
+ENUMS_AUTOMATIC(COLOR);  // Add semicolon
 
 /* Define an HTTP status enum for testing manual value assignment
  * Demonstrates real-world enum usage with specific values */
@@ -34,7 +34,7 @@ ENUMS_AUTOMATIC(COLOR)
     GENERATOR(NOT_FOUND, 404), \
     GENERATOR(ERROR, 500)
 
-ENUMS_ASSIGNED(STATUS)
+ENUMS_ASSIGNED(STATUS);  // Add semicolon
 
 /*-----------------------------------------------------------------------------
  * Test Implementation
