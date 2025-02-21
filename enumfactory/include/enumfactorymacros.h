@@ -1,33 +1,50 @@
 /*
  * =====================================================================================
+ * EnumFactory - Advanced Enum Generation Macros
+ * =====================================================================================
  *
- *       Filename:  enumfactory.h
+ * A flexible enum generation system that provides:
+ * - Automatic string conversion
+ * - Value mapping
+ * - Type-safe access
+ * - Bounds checking
+ * - Array generation
  *
- *    Description:  Enum macros 
+ * Usage Example:
+ * -------------
+ * #define COLOR_ENUM(GENERATOR) \
+ *     GENERATOR(RED), \
+ *     GENERATOR(GREEN), \
+ *     GENERATOR(BLUE)
  *
- *        Version:  1.0
- *        Created:  08/07/2017 03:00:49
- *       Revision:  none
- *       Compiler:  gcc
- *
- *         Author:  Arie E. 
- *
+ * ENUMS_AUTOMATIC(COLOR)
+ * 
+ * // Now you can use:
+ * // COLOR_label[RED] -> "RED"
+ * // ENUM_IS_VALID(COLOR, value) -> bounds checking
+ * // COLOR_get_label(RED) -> safe access to label
  * =====================================================================================
  */
+
 #pragma once
 #ifndef  __ENUMFACTORYMACROS_H__
 #define  __ENUMFACTORYMACROS_H__
 
 /*-----------------------------------------------------------------------------
- *  
- * Base enum definitions  
- *
+ * Base Enum Generation Macros
+ * These macros form the foundation of enum member generation
  *-----------------------------------------------------------------------------*/
 
-/* Enumerator's member */
+/* Basic enum member generation without value assignment
+ * Args:
+ *   _ : The enum member name
+ *   ...: Variable arguments (unused, for compatibility) */
 #define ENUM(_,...) _
 
-/* Enumerator as array index   */
+/* Generate array index accessor for enum member
+ * Args:
+ *   _ : The enum member name to use as array index
+ *   ...: Variable arguments (unused, for compatibility) */
 #define ENUM_INDEX(_,...) [_] 
 
 /* Enumerator's member  as string */
@@ -109,16 +126,30 @@ __attribute__((unused)) static inline T _enum ## _get_ ## _suffix(_enum value) {
 #define ENUMS_AUTOMATIC(_) ENUMS_BASE(_, ENUM)               
 #define ENUMS_ASSIGNED(_)  ENUMS_BASE(_, ENUM_VALUE_ASSIGN)  
 
-// Add type safety wrapper
+/*-----------------------------------------------------------------------------
+ * Safety and Validation Macros
+ * Provides runtime safety checks and bounds validation
+ *-----------------------------------------------------------------------------*/
+
+/* Safe array access with bounds checking
+ * Args:
+ *   _array: The array to access
+ *   _enum: The enum type
+ *   _index: The index to access
+ * Returns: Array element or NULL if out of bounds */
 #define ENUM_SAFE_ARRAY_ACCESS(_array, _enum, _index) \
     ((_index >= 0 && _index < ENUM_TOTAL(_enum)) ? _array[_index] : NULL)
 
-// Add enum iteration helpers
-#define ENUM_BEGIN(_enum) ((_enum)0)
-#define ENUM_END(_enum) (ENUM_TOTAL(_enum))
+/* Enum range and validity checking utilities
+ * These macros help with enum value validation and iteration */
+#define ENUM_BEGIN(_enum) ((_enum)0)  // First valid enum value
+#define ENUM_END(_enum) (ENUM_TOTAL(_enum))  // One past last valid enum value
 #define ENUM_IS_VALID(_enum, _value) ((_value) >= 0 && (_value) < ENUM_TOTAL(_enum))
 
-// Add string conversion helper
+/* Convenience string conversion macro
+ * Generates a type-safe conversion function from enum to string
+ * Args:
+ *   _enum: The enum type to generate converter for */
 #define ENUM_TO_STRING(_enum) \
     static inline const char* _enum ## _to_string(_enum value) { \
         return _enum ## _get_label(value); \
