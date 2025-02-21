@@ -14,6 +14,7 @@
  *
  * =====================================================================================
  */
+#pragma once
 #ifndef  __ENUMFACTORYMACROS_H__
 #define  __ENUMFACTORYMACROS_H__
 
@@ -34,6 +35,13 @@
 
 /* Enumerator's member with custom value */
 #define ENUM_VALUE_ASSIGN(_, _v,...)  _= _v
+
+/*-----------------------------------------------------------------------------
+ *  Parameter documentation
+ *  _ : enum member name
+ *  _v: enum member value
+ *  ...: additional parameters (unused)
+ *-----------------------------------------------------------------------------*/
 
 /*-----------------------------------------------------------------------------
  *  
@@ -69,7 +77,10 @@ typedef enum _ ## _enum \
 #define _generate_enums_array(_enum, T, _suffix, _generator)  \
 __attribute__((unused)) static const T _enum ## _ ## _suffix[ENUM_TOTAL(_enum)] = { \
                         _enum(_generator), \
-};
+}; \
+__attribute__((unused)) static inline T _enum ## _get_ ## _suffix(_enum value) { \
+    return ENUM_IS_VALID(_enum, value) ? _enum ## _ ## _suffix[value] : NULL; \
+}
 
 /*-----------------------------------------------------------------------------
  *  
@@ -98,4 +109,19 @@ __attribute__((unused)) static const T _enum ## _ ## _suffix[ENUM_TOTAL(_enum)] 
 #define ENUMS_AUTOMATIC(_) ENUMS_BASE(_, ENUM)               
 #define ENUMS_ASSIGNED(_)  ENUMS_BASE(_, ENUM_VALUE_ASSIGN)  
 
-#endif   /*  __ENUMFACTORYMACROS_H__ */ 
+// Add type safety wrapper
+#define ENUM_SAFE_ARRAY_ACCESS(_array, _enum, _index) \
+    ((_index >= 0 && _index < ENUM_TOTAL(_enum)) ? _array[_index] : NULL)
+
+// Add enum iteration helpers
+#define ENUM_BEGIN(_enum) ((_enum)0)
+#define ENUM_END(_enum) (ENUM_TOTAL(_enum))
+#define ENUM_IS_VALID(_enum, _value) ((_value) >= 0 && (_value) < ENUM_TOTAL(_enum))
+
+// Add string conversion helper
+#define ENUM_TO_STRING(_enum) \
+    static inline const char* _enum ## _to_string(_enum value) { \
+        return _enum ## _get_label(value); \
+    }
+
+#endif   /*  __ENUMFACTORYMACROS_H__ */
