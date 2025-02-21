@@ -77,25 +77,20 @@
 /* Definition for total number of enum members  */
 #define ENUM_TOTAL(_) _ ## _total
 
-/* Generate enumeration table with addional value ( XXXXX_total ) as total of enumarator's members */
+/* Generate enumeration table with additional value (XXXXX_total) as total of enumerator's members */
 #define _generate_enums(_enum, _generator) \
-typedef enum _ ## _enum \
-             { \
-               _enum(_generator), \
-               ENUM_TOTAL(_enum) \
-             } _enum;                          
+typedef enum { \
+    _enum(_generator) \
+    ENUM_TOTAL(_enum) \
+} _enum;
 
-/*  Generate array of values there  every enumerator member is the index 
- *  T-  type of array
- *  _enum ## _ ##  _suffix  - the name of array
- *  ENUM_TOTAL(_enum) -  the total numbers of array's elements from GENERATE_ENUMS defenition
- */ 
-
+/* Generate array of values where every enumerator member is the index */
 #define _generate_enums_array(_enum, T, _suffix, _generator)  \
-__attribute__((unused)) static const T _enum ## _ ## _suffix[ENUM_TOTAL(_enum)] = { \
-                        _enum(_generator), \
+static const T _enum ## _ ## _suffix[ENUM_TOTAL(_enum)] = { \
+    _enum(_generator) \
+    NULL \
 }; \
-__attribute__((unused)) static inline T _enum ## _get_ ## _suffix(_enum value) { \
+static inline T _enum ## _get_ ## _suffix(_enum value) { \
     return ENUM_IS_VALID(_enum, value) ? _enum ## _ ## _suffix[value] : NULL; \
 }
 
