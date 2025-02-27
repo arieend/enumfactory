@@ -107,7 +107,7 @@ static const T _enum ## _ ## _suffix[ENUM_TOTAL(_enum)] = { \
 
 /*  
  *
- *  Generaye enums and array like XXXX_label[enum] = "enum"
+ *  Generate enums and array like XXXX_label[enum] = "enum"
  *
  *  ENUM_AUTOMATIC - Automatic enumarators valus        ex.: enum { ENUM0, ENUM1, ENUM2,... } 
  *  ENUM_ASSIGNED  - Assign value to every enum member  ex.: enum { ENUM0=10, ENUM1=20, ENUM2=30, ....} 
