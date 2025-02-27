@@ -60,6 +60,9 @@ Since **EnumFactory** is a header-only library, there's no need for building or 
             GENERATOR(RED,10), \
             GENERATOR(GREEN,20), \
             GENERATOR(BLUE,30)
+        ```
+
+        ```cpp
         ENUMS_ASSIGNED(COLOR)
         ```
 
