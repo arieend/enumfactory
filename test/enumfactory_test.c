@@ -19,7 +19,15 @@
  *-----------------------------------------------------------------------------*/
 
 /* Define a basic color enum for testing automatic value assignment
- * Expected values: RED=0, GREEN=1, BLUE=2 */
+ * Expected values: RED=0, GREEN=1, BLUE=2 
+ *
+ * HOW IT WORKS:
+ * The X-macro pattern is used here. X is the generator, G is the context.
+ * When expanded by ENUMS_AUTOMATIC(COLOR):
+ * - X becomes ENUM (invokes ENUM(G, RED), etc.)
+ * - G becomes the generator argument (e.g., _X_COMMA)
+ * result: RED, GREEN, BLUE,
+ */
 #define COLOR_ENUM(X, G) \
     X(G, RED) \
     X(G, GREEN) \
@@ -28,7 +36,14 @@
 ENUMS_AUTOMATIC(COLOR);  // Add semicolon
 
 /* Define an HTTP status enum for testing manual value assignment
- * Demonstrates real-world enum usage with specific values */
+ * Demonstrates real-world enum usage with specific values 
+ *
+ * HOW IT WORKS:
+ * Here, we provide 3 arguments to X.
+ * When expanded by ENUMS_ASSIGNED(STATUS):
+ * - X becomes ENUM_VALUE_ASSIGN
+ * - It generates: OK = 200, NOT_FOUND = 404, ERROR = 500,
+ */
 #define STATUS_ENUM(X, G) \
     X(G, OK, 200) \
     X(G, NOT_FOUND, 404) \
@@ -74,6 +89,10 @@ ENUMS_AUTOMATIC(FRUIT);
     X(G, MEDIUM, 5) \
     X(G, HIGH, 10)
 
+/* Parallel Data Generation 
+ * This second macro allows us to generate a Score array that aligns with the Priority enum.
+ * Note how it reuses the same keys (LOW, MEDIUM, HIGH) but maps them to different values (0, 50, 100).
+ */
 #define PRIORITY_SCORE_GEN(X, G) \
     X(G, LOW, 0) \
     X(G, MEDIUM, 50) \
@@ -100,6 +119,11 @@ ENUMS_ARRAY(PRIORITY, PRIORITY_SCORE_GEN, int, score);
     X(G, ERROR, "Internal failure")
 
 ENUMS_ARRAY(STATUS, STATUS_DESC_GEN, const char*, description);
+
+ENUM_TO_STRING(COLOR);
+ENUM_TO_STRING(FRUIT);
+ENUM_TO_STRING(STATUS);
+ENUM_TO_STRING(PRIORITY);
 /*
  * Generated Array: STATUS_description
  * -------------------------
@@ -132,6 +156,8 @@ void test_automatic_enum(void) {
     assert(strcmp(COLOR_label[BLUE], "BLUE") == 0);
 
     assert(strcmp(COLOR_get_label(RED), "RED") == 0);
+    assert(strcmp(COLOR_get_label(RED), "RED") == 0);
+    // Bounds checking test: 99 is invalid, shoud return NULL or empty
     assert(strcmp(COLOR_get_label(99), "") == 0 || COLOR_get_label(99) == NULL);
 }
 
@@ -176,6 +202,10 @@ void test_priority_map(void) {
     assert(PRIORITY_get_score(99) == 0);
 }
 
+void test_priority_count(void) {
+    assert(PRIORITY_count == 3);
+}
+
 /* Test custom string maps */
 void test_status_description(void) {
     assert(strcmp(STATUS_description[OK], "All systems go") == 0);
@@ -183,9 +213,6 @@ void test_status_description(void) {
     assert(STATUS_get_description(201) == NULL);
 }
 
-ENUM_TO_STRING(COLOR);
-ENUM_TO_STRING(FRUIT);
-ENUM_TO_STRING(STATUS);
 
 /* Test safety features and bounds checking
  * Validates:
@@ -219,6 +246,50 @@ void test_enum_to_string(void) {
     assert(strcmp(STATUS_to_string(ERROR), "ERROR") == 0);
 }
 
+void print_fruit_values(void) {
+    printf("FRUIT values:\n");
+    for (int i = 0; i < FRUIT_total; i++) {
+        const char* name = FRUIT_to_string(i);
+        if (name) {
+             printf("  %s = %d\n", name, i);
+        }
+    }
+}
+
+void print_color_values(void) {
+    printf("COLOR values:\n");
+    for (int i = 0; i < COLOR_total; i++) {
+        const char* name = COLOR_to_string(i);
+        if (name) {
+             printf("  %s = %d\n", name, i);
+        }
+    }
+}
+
+void print_status_values(void) {
+    printf("STATUS values:\n");
+    // STATUS is sparse, so we iterate through the range but many will be NULL
+    // However, for testing demonstration we can just iterate up to max known or just check specific ones.
+    // Since STATUS_total is 501, iterating all might be verbose if not filtered.
+    // But per request "print all macro values", I will iterate and print valid ones.
+    for (int i = 0; i < STATUS_total; i++) {
+        const char* name = STATUS_to_string(i);
+        if (name) {
+             printf("  %s = %d\n", name, i);
+        }
+    }
+}
+
+void print_priority_values(void) {
+    printf("PRIORITY values:\n");
+    for (int i = 0; i < PRIORITY_total; i++) {
+        const char* name = PRIORITY_to_string(i);
+        if (name) {
+             printf("  %s = %d\n", name, i);
+        }
+    }
+}
+
 /* Main test runner
  * Executes all test cases and reports results */
 int main(void) {
@@ -238,9 +309,17 @@ int main(void) {
 
     test_fruit_enum();
     printf("Multi-enum collision tests passed\n");
+    
+    print_fruit_values();
+    print_color_values();
+    print_status_values();
+    print_priority_values();
 
     test_priority_map();
     printf("Custom map tests passed\n");
+
+    test_priority_count();
+    printf("Priority count test passed\n");
 
     test_status_description();
     printf("Status description tests passed\n");
