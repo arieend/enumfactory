@@ -6,12 +6,12 @@
 
 ## Key Features
 
-*   **Automatic String Conversion:** Easily convert enum members to their string representations without manual `switch` statements.
-*   **Value Mapping:** Create custom maps that associate enum members with specific values (strings or integers).
-*   **Type-Safe Access:** Access enum-related data in a type-safe manner, reducing the risk of errors.
-*   **Bounds Checking:** Perform runtime bounds checks to ensure that enum values are valid, preventing unexpected behavior.
-*   **Array Generation:** Automatically generate arrays indexed by enum members, storing string labels or custom values.
-*   **Automatic and Assigned Enum Values:** Allows for automatic enum value assignation (0,1,2,...) or custom value assignation.
+- **Automatic String Conversion:** Easily convert enum members to their string representations without manual `switch` statements.
+- **Value Mapping:** Create custom maps that associate enum members with specific values (strings or integers).
+- **Type-Safe Access:** Access enum-related data in a type-safe manner, reducing the risk of errors.
+- **Bounds Checking:** Perform runtime bounds checks to ensure that enum values are valid, preventing unexpected behavior.
+- **Array Generation:** Automatically generate arrays indexed by enum members, storing string labels or custom values.
+- **Automatic and Assigned Enum Values:** Allows for automatic enum value assignation (0,1,2,...) or custom value assignation.
 
 ## Getting Started
 
@@ -31,56 +31,58 @@ Since **EnumFactory** is a header-only library, there's no need for building or 
     ```
 
 2.  **Generate the Enum:** Use the `ENUMS_AUTOMATIC` or `ENUMS_ASSIGNED` macro to generate the enum type and associated structures.
+    - **Automatic Value Assignment:**
 
-    *   **Automatic Value Assignment:**
+      ```cpp
+      ENUMS_AUTOMATIC(COLOR)
+      ```
 
-        ```cpp
-        ENUMS_AUTOMATIC(COLOR)
-        ```
-        This generates:
-        ```cpp
-        typedef enum {
-           RED, //0
-           GREEN, //1
-           BLUE, //2
-           COLOR_total
-        } COLOR;
-        
-        static const char* COLOR_label[COLOR_total] = {
-            [RED] = "RED",
-            [GREEN] = "GREEN",
-            [BLUE] = "BLUE",
-        };
-        ```
+      This generates:
 
-    * **Assigned Value Assignment:**
+      ```cpp
+      typedef enum {
+         RED, //0
+         GREEN, //1
+         BLUE, //2
+         COLOR_total
+      } COLOR;
 
-        ```cpp
-         #define COLOR_ENUM(GENERATOR) \
-            GENERATOR(RED,10), \
-            GENERATOR(GREEN,20), \
-            GENERATOR(BLUE,30)
-        ```
+      static const char* COLOR_label[COLOR_total] = {
+          [RED] = "RED",
+          [GREEN] = "GREEN",
+          [BLUE] = "BLUE",
+      };
+      ```
 
-        ```cpp
-        ENUMS_ASSIGNED(COLOR)
-        ```
+    - **Assigned Value Assignment:**
 
-        This generates:
-        ```cpp
-        typedef enum {
-            RED = 10,
-            GREEN = 20,
-            BLUE = 30,
-            COLOR_total
-        } COLOR;
-        
-        static const char* COLOR_label[COLOR_total] = {
-            [RED] = "RED",
-            [GREEN] = "GREEN",
-            [BLUE] = "BLUE",
-        };
-        ```
+      ```cpp
+       #define COLOR_ENUM(GENERATOR) \
+          GENERATOR(RED,10), \
+          GENERATOR(GREEN,20), \
+          GENERATOR(BLUE,30)
+      ```
+
+      ```cpp
+      ENUMS_ASSIGNED(COLOR)
+      ```
+
+      This generates:
+
+      ```cpp
+      typedef enum {
+          RED = 10,
+          GREEN = 20,
+          BLUE = 30,
+          COLOR_total
+      } COLOR;
+
+      static const char* COLOR_label[COLOR_total] = {
+          [RED] = "RED",
+          [GREEN] = "GREEN",
+          [BLUE] = "BLUE",
+      };
+      ```
 
 3.  **Using the Enum:** Access the generated enum, labels, and safety features.
 
@@ -119,7 +121,7 @@ Since **EnumFactory** is a header-only library, there's no need for building or 
         // Enum to string
         ENUM_TO_STRING(COLOR)
         std::cout << "GREEN as string: "<< COLOR_to_string(COLOR::GREEN) << std::endl; // Output: GREEN as string: GREEN
-        
+
         return 0;
     }
     ```
@@ -150,36 +152,54 @@ Since **EnumFactory** is a header-only library, there's no need for building or 
 
 ### Base Generation Macros
 
-*   `ENUM(_, ...)`: Basic enum member generation (no special behavior).
-*   `ENUM_INDEX(_, ...)`: Creates an array index accessor from an enum member.
-*   `ENUM_STRING(_, ...)`: Converts an enum member name to a string literal.
-*   `ENUM_VALUE_ASSIGN(_, _v, ...)`: Assigns a custom value to an enum member.
+- `ENUM(_, ...)`: Basic enum member generation (no special behavior).
+- `ENUM_INDEX(_, ...)`: Creates an array index accessor from an enum member.
+- `ENUM_STRING(_, ...)`: Converts an enum member name to a string literal.
+- `ENUM_VALUE_ASSIGN(_, _v, ...)`: Assigns a custom value to an enum member.
 
 ### Enum Implementation Macros
 
-*   `ENUM_VALUE_MAP(_, _v, ...)`: Creates a map that associates enum members with values.
-*   `ENUM_STRING_VALUE_MAP(_, _v, ...)`: Creates a map that associates enum members with string values.
-*   `ENUM_STRING_SELF_MAP(_, ...)`: Creates a map that associates enum members with their own names as strings.
-*   `ENUM_TOTAL(_)`: Defines the total number of enum members (e.g., `COLOR_total`).
-*   `_generate_enums(_enum, _generator)`: Generates the enum type using a specified member generator.
-*   `_generate_enums_array(_enum, T, _suffix, _generator)`: Generates an array of values associated with the enum members.
+- `ENUM_VALUE_MAP(_, _v, ...)`: Creates a map that associates enum members with values.
+- `ENUM_STRING_VALUE_MAP(_, _v, ...)`: Creates a map that associates enum members with string values.
+- `ENUM_STRING_SELF_MAP(_, ...)`: Creates a map that associates enum members with their own names as strings.
+- `ENUM_TOTAL(_)`: Defines the range of the enum (highest value + 1). Use for array allocations.
+- `ENUM_COUNT(_)`: Defines the actual number of members defined. Use for logic that needs to know how many options exist.
+- `_generate_enums(_enum, _generator)`: Generates the enum type using a specified member generator.
+- `_generate_enums_array(_enum, T, _suffix, _generator)`: Generates an array of values associated with the enum members.
 
 ### Arrays' Generator Macros
 
-*   `ENUMS(_enum, _generator)`: Generates the enum type.
-*   `ENUMS_ARRAY(_enum, _array_type, _array_suffix, _array_generator)`: Generates an array for the enum.
-*   `ENUMS_MAP(_enum, _enum_generator, _array_type, _array_suffix, _array_generator)`: Generates both the enum and its associated array.
-*   `ENUMS_BASE(_, _enum_generator)`:  Generates enums and a default label array.
-*   `ENUMS_AUTOMATIC(_)`: Generates an enum with automatic values (0, 1, 2, ...) and a label array.
-*   `ENUMS_ASSIGNED(_)`: Generates an enum with assigned values and a label array.
+- `ENUMS(_enum, _generator)`: Generates the enum type.
+- `ENUMS_ARRAY(_enum, _array_type, _array_suffix, _array_generator)`: Generates an array for the enum.
+- `ENUMS_MAP(_enum, _enum_generator, _array_type, _array_suffix, _array_generator)`: Generates both the enum and its associated array.
+- `ENUMS_BASE(_, _enum_generator)`: Generates enums and a default label array.
+- `ENUMS_AUTOMATIC(_)`: Generates an enum with automatic values (0, 1, 2, ...) and a label array.
+- `ENUMS_ASSIGNED(_)`: Generates an enum with assigned values and a label array.
 
 ### Safety and Validation Macros
 
-*   `ENUM_SAFE_ARRAY_ACCESS(_array, _enum, _index)`: Provides safe access to an enum-related array, returning `NULL` if out of bounds.
-*   `ENUM_BEGIN(_enum)`: Returns the first valid enum value (0).
-*   `ENUM_END(_enum)`: Returns one past the last valid enum value.
-*   `ENUM_IS_VALID(_enum, _value)`: Checks if a value is a valid enum member.
-*   `ENUM_TO_STRING(_enum)`: Generates a function `_enum_to_string` that converts an enum to its string representation.
+- `ENUM_SAFE_ARRAY_ACCESS(_array, _enum, _index)`: Provides safe access to an enum-related array, returning `NULL` if out of bounds.
+- `ENUM_BEGIN(_enum)`: Returns the first valid enum value (0).
+- `ENUM_END(_enum)`: Returns one past the last valid enum value.
+- `ENUM_IS_VALID(_enum, _value)`: Checks if a value is a valid enum member.
+- `ENUM_TO_STRING(_enum)`: Generates a function `_enum_to_string` that converts an enum to its string representation.
+
+## Best Practices: Documentation
+
+When using these macros, it is recommended to add a comment block explaining the generated values, as X-macro expansions can be hard to track.
+
+Example:
+
+```c
+ENUMS_ASSIGNED(STATUS);
+/*
+ * Generated Enum: STATUS
+ * -------------------------
+ * Type: Assigned
+ * Actual Member Count: 3
+ * Range (total): 0 to 501 (exclusive)
+ */
+```
 
 ## Contributing
 

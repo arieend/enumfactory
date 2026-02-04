@@ -12,13 +12,13 @@
  *
  * Usage Example:
  * -------------
- * #define COLOR_ENUM(GENERATOR) \
- *     GENERATOR(RED), \
- *     GENERATOR(GREEN), \
- *     GENERATOR(BLUE)
+ * #define COLOR_ENUM(X, G) \
+ *     X(G, RED), \
+ *     X(G, GREEN), \
+ *     X(G, BLUE)
  *
- * ENUMS_AUTOMATIC(COLOR)
- * 
+ * ENUMS_AUTOMATIC(COLOR);
+ *
  * // Now you can use:
  * // COLOR_label[RED] -> "RED"
  * // ENUM_IS_VALID(COLOR, value) -> bounds checking
@@ -27,123 +27,77 @@
  */
 
 #pragma once
-#ifndef  __ENUMFACTORYMACROS_H__
-#define  __ENUMFACTORYMACROS_H__
+#ifndef __ENUMFACTORYMACROS_H__
+#define __ENUMFACTORYMACROS_H__
 
 /*-----------------------------------------------------------------------------
  * Base Enum Generation Macros
  * These macros form the foundation of enum member generation
  *-----------------------------------------------------------------------------*/
 
-/* Basic enum member generation without value assignment
- * Args:
- *   _ : The enum member name
- *   ...: Variable arguments (unused, for compatibility) */
-#define ENUM(_,...) _
+/* Core Generators (No trailing commas) */
+#define ENUM(_1, ...) _1
+#define ENUM_VALUE_ASSIGN(_1, _2, ...) _1 = _2
+#define ENUM_VALUE_MAP(_1, ...) [(_1)] = ENUM_VALUE_MAP_VAL_(__VA_ARGS__, _1)
+#define ENUM_VALUE_MAP_VAL_(_val, ...) _val
+#define ENUM_STRING_SELF_MAP(_1, ...) [(_1)] = #_1
 
-/* Generate array index accessor for enum member
- * Args:
- *   _ : The enum member name to use as array index
- *   ...: Variable arguments (unused, for compatibility) */
-#define ENUM_INDEX(_,...) [_] 
+/* Invokers */
+#define _X_CALL(_gen, ...) _gen(__VA_ARGS__)
+#define _X_COMMA(_gen, ...) _gen(__VA_ARGS__),
+#define _ENUM_VAL_COUNT(_1, ...) 1,
 
-/* Enumerator's member  as string */
-#define ENUM_STRING(_,...) #_ 
-
-/* Enumerator's member with custom value */
-#define ENUM_VALUE_ASSIGN(_, _v,...)  _= _v
-
-/*-----------------------------------------------------------------------------
- *  Parameter documentation
- *  _ : enum member name
- *  _v: enum member value
- *  ...: additional parameters (unused)
- *-----------------------------------------------------------------------------*/
-
-/*-----------------------------------------------------------------------------
- *  
- *  Enum implementation
- *
- *-----------------------------------------------------------------------------*/
-/* Enumerator's member to value hash realation  */
-#define ENUM_VALUE_MAP(_,_v,...)  ENUM_VALUE_ASSIGN(ENUM_INDEX(_), _v) /* [ENUM] = VALUE */
-
-/* Enumerator's member to value hash realation as a string */
-#define ENUM_STRING_VALUE_MAP(_, _v,...)  ENUM_VALUE_ASSIGN(ENUM_INDEX(_),ENUM_STRING(_v))  /* [ENUM]="VALUE" */
-
-/* Map enumerator's member to its self as desrtiption */ 
-#define ENUM_STRING_SELF_MAP(_,...)  ENUM_STRING_VALUE_MAP(_,_) /* [ENUM]="ENUM" */
-
-/* Definition for total number of enum members  */
-#define ENUM_TOTAL(_) _ ## _total
-
-/* Generate enumeration table with additional value (XXXXX_total) as total of enumerator's members */
-#define _generate_enums(_enum, _generator) \
+/* Unified Generation Macro */
+#define GENERATE_ENUM_CORE(_enum_name, _enum_list, _generator) \
 typedef enum { \
-    _enum(_generator), \
-    ENUM_TOTAL(_enum) \
-} _enum
-
-/* Generate array of values where every enumerator member is the index */
-#define _generate_enums_array(_enum, T, _suffix, _generator)  \
-static const T _enum ## _ ## _suffix[ENUM_TOTAL(_enum)] = { \
-    _enum(_generator) \
+    _enum_list(_X_COMMA, _generator) \
+    _enum_name ## _total \
+} _enum_name; \
+static const int _enum_name ## _count __attribute__((unused)) = (sizeof((int[]){ _enum_list(_ENUM_VAL_COUNT) 0 }) / sizeof(int)) - 1; \
+static const char* _enum_name ## _label[ _enum_name ## _total ] __attribute__((unused)) = { \
+    _enum_list(_X_COMMA, ENUM_STRING_SELF_MAP) \
+}; \
+static inline const char* _enum_name ## _get_label(int value) __attribute__((unused)) { \
+    return (value >= 0 && value < _enum_name ## _total) ? _enum_name ## _label[value] : (const char*)0; \
 }
 
-/*-----------------------------------------------------------------------------
- *  
- *  Arrays' generator
- *
- *-----------------------------------------------------------------------------*/
-/* Base generators  */
-#define ENUMS(_enum, _generator)                                          _generate_enums(_enum, _generator)
-#define ENUMS_ARRAY(_enum, _array_type, _array_suffix, _array_generator)  _generate_enums_array(_enum, _array_type, _array_suffix, _array_generator)
+#define ENUM_TOTAL(_enum) _enum ## _total
+#define ENUM_COUNT(_enum) _enum ## _count
 
-/* Generator for enums and enum's map   */
-#define ENUMS_MAP(_enum, _enum_generator, _array_type, _array_suffix, _array_generator) \
-        ENUMS(_enum, _enum_generator ) \
-        ENUMS_ARRAY(_enum, _array_type, _array_suffix, _array_generator)
+#define ENUMS_AUTOMATIC(_enum_name) GENERATE_ENUM_CORE(_enum_name, _enum_name ## _ENUM, ENUM)
+#define ENUMS_ASSIGNED(_enum_name) GENERATE_ENUM_CORE(_enum_name, _enum_name ## _ENUM, ENUM_VALUE_ASSIGN)
 
+/* Specialized Map/Array Generation */
+#define ENUMS_ARRAY(_enum_name, _enum_list, _type, _suffix) \
+static const _type _enum_name ## _ ## _suffix[ _enum_name ## _total ] __attribute__((unused)) = { \
+    _enum_list(_X_COMMA, ENUM_VALUE_MAP) \
+}; \
+static inline _type _enum_name ## _get_ ## _suffix(int value) __attribute__((unused)) { \
+    return (value >= 0 && value < _enum_name ## _total) ? _enum_name ## _ ## _suffix[value] : (_type)0; \
+}
 
-/*  
- *
- *  Generate enums and array like XXXX_label[enum] = "enum"
- *
- *  ENUM_AUTOMATIC - Automatic enumarators valus        ex.: enum { ENUM0, ENUM1, ENUM2,... } 
- *  ENUM_ASSIGNED  - Assign value to every enum member  ex.: enum { ENUM0=10, ENUM1=20, ENUM2=30, ....} 
- */
-#define ENUMS_BASE(_, _enum_generator) ENUMS_MAP(_, _enum_generator,  char*, label, ENUM_STRING_SELF_MAP)
-
-#define ENUMS_AUTOMATIC(_) ENUMS_BASE(_, ENUM)               
-#define ENUMS_ASSIGNED(_)  ENUMS_BASE(_, ENUM_VALUE_ASSIGN)  
+#define ENUMS_MAP(_enum_name, _enum_list, _generator, _type, _suffix) \
+GENERATE_ENUM_CORE(_enum_name, _enum_list, _generator) \
+ENUMS_ARRAY(_enum_name, _enum_list, _type, _suffix)
 
 /*-----------------------------------------------------------------------------
  * Safety and Validation Macros
  * Provides runtime safety checks and bounds validation
  *-----------------------------------------------------------------------------*/
 
-/* Safe array access with bounds checking
- * Args:
- *   _array: The array to access
- *   _enum: The enum type
- *   _index: The index to access
- * Returns: Array element or NULL if out of bounds */
-#define ENUM_SAFE_ARRAY_ACCESS(_array, _enum, _index) \
-    ((_index >= 0 && _index < ENUM_TOTAL(_enum)) ? _array[_index] : NULL)
+#define ENUM_IS_VALID(_enum, _value) \
+    ((_value) >= 0 && (_value) < ENUM_TOTAL(_enum) && _enum ## _get_label(_value) != (const char*)0)
 
-/* Enum range and validity checking utilities
- * These macros help with enum value validation and iteration */
-#define ENUM_BEGIN(_enum) ((_enum)0)  // First valid enum value
-#define ENUM_END(_enum) (ENUM_TOTAL(_enum))  // One past last valid enum value
-#define ENUM_IS_VALID(_enum, _value) ((_value) >= 0 && (_value) < ENUM_TOTAL(_enum))
-
-/* Convenience string conversion macro
- * Generates a type-safe conversion function from enum to string
- * Args:
- *   _enum: The enum type to generate converter for */
 #define ENUM_TO_STRING(_enum) \
-    static inline const char* _enum ## _to_string(_enum value) { \
+    static inline const char* _enum ## _to_string(int value) __attribute__((unused)); \
+    static inline const char* _enum ## _to_string(int value) { \
         return _enum ## _get_label(value); \
     }
 
-#endif   /*  __ENUMFACTORYMACROS_H__ */
+#define ENUM_BEGIN(_enum) ((int)0)
+#define ENUM_END(_enum) (ENUM_TOTAL(_enum))
+
+#define ENUM_SAFE_ARRAY_ACCESS(_array, _enum, _index) \
+    ((_index >= 0 && _index < ENUM_TOTAL(_enum)) ? _array[_index] : (void*)0)
+
+#endif /* __ENUMFACTORYMACROS_H__ */
