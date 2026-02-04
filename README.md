@@ -24,10 +24,10 @@ Since **EnumFactory** is a header-only library, there's no need for building or 
 1.  **Define Your Enum Members:** Create a macro that lists your enum members. This macro must take a `GENERATOR` argument.
 
     ```cpp
-    #define COLOR_ENUM(GENERATOR) \
-        GENERATOR(RED), \
-        GENERATOR(GREEN), \
-        GENERATOR(BLUE)
+    #define COLOR_ENUM(X, G) \
+        X(G, RED) \
+        X(G, GREEN) \
+        X(G, BLUE)
     ```
 
 2.  **Generate the Enum:** Use the `ENUMS_AUTOMATIC` or `ENUMS_ASSIGNED` macro to generate the enum type and associated structures.
@@ -86,14 +86,18 @@ Since **EnumFactory** is a header-only library, there's no need for building or 
 
 3.  **Using the Enum:** Access the generated enum, labels, and safety features.
 
+    ````cpp
+    #include "enumfactorymacros.h"
+    #include <iostream>
+
     ```cpp
     #include "enumfactorymacros.h"
     #include <iostream>
 
-    #define COLOR_ENUM(GENERATOR) \
-        GENERATOR(RED), \
-        GENERATOR(GREEN), \
-        GENERATOR(BLUE)
+    #define COLOR_ENUM(X, G) \
+        X(G, RED) \
+        X(G, GREEN) \
+        X(G, BLUE)
 
     ENUMS_AUTOMATIC(COLOR)
 
@@ -124,16 +128,20 @@ Since **EnumFactory** is a header-only library, there's no need for building or 
 
         return 0;
     }
-    ```
+    ````
+
+    ````cpp
+    #include "enumfactorymacros.h"
+    #include <iostream>
 
     ```cpp
     #include "enumfactorymacros.h"
     #include <iostream>
 
-    #define COLOR_ENUM(GENERATOR) \
-        GENERATOR(RED,10), \
-        GENERATOR(GREEN,20), \
-        GENERATOR(BLUE,30)
+    #define COLOR_ENUM(X, G) \
+        X(G, RED, 10) \
+        X(G, GREEN, 20) \
+        X(G, BLUE, 30)
 
     ENUMS_ASSIGNED(COLOR)
 
@@ -146,7 +154,7 @@ Since **EnumFactory** is a header-only library, there's no need for building or 
         std::cout << "Is 10 (valid index) a valid color? " << ENUM_IS_VALID(COLOR, 10) << std::endl; // Output: Is 10 (valid index) a valid color? 0
         return 0;
     }
-    ```
+    ````
 
 ## Available Macros
 

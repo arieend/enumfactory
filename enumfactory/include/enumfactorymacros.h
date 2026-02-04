@@ -53,11 +53,11 @@ typedef enum { \
     _enum_list(_X_COMMA, _generator) \
     _enum_name ## _total \
 } _enum_name; \
-static const int _enum_name ## _count __attribute__((unused)) = (sizeof((int[]){ _enum_list(_ENUM_VAL_COUNT) 0 }) / sizeof(int)) - 1; \
-static const char* _enum_name ## _label[ _enum_name ## _total ] __attribute__((unused)) = { \
+static const int _enum_name ## _count = (sizeof((int[]){ _enum_list(_ENUM_VAL_COUNT, 0) 0 }) / sizeof(int)) - 1; \
+static const char* _enum_name ## _label[ _enum_name ## _total ] = { \
     _enum_list(_X_COMMA, ENUM_STRING_SELF_MAP) \
 }; \
-static inline const char* _enum_name ## _get_label(int value) __attribute__((unused)) { \
+static inline const char* _enum_name ## _get_label(int value) { \
     return (value >= 0 && value < _enum_name ## _total) ? _enum_name ## _label[value] : (const char*)0; \
 }
 
@@ -69,10 +69,10 @@ static inline const char* _enum_name ## _get_label(int value) __attribute__((unu
 
 /* Specialized Map/Array Generation */
 #define ENUMS_ARRAY(_enum_name, _enum_list, _type, _suffix) \
-static const _type _enum_name ## _ ## _suffix[ _enum_name ## _total ] __attribute__((unused)) = { \
+static const _type _enum_name ## _ ## _suffix[ _enum_name ## _total ] = { \
     _enum_list(_X_COMMA, ENUM_VALUE_MAP) \
 }; \
-static inline _type _enum_name ## _get_ ## _suffix(int value) __attribute__((unused)) { \
+static inline _type _enum_name ## _get_ ## _suffix(int value) { \
     return (value >= 0 && value < _enum_name ## _total) ? _enum_name ## _ ## _suffix[value] : (_type)0; \
 }
 

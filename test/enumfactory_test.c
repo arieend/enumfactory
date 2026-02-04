@@ -20,19 +20,19 @@
 
 /* Define a basic color enum for testing automatic value assignment
  * Expected values: RED=0, GREEN=1, BLUE=2 */
-#define COLOR_ENUM(GENERATOR) \
-    GENERATOR(RED), \
-    GENERATOR(GREEN), \
-    GENERATOR(BLUE)
+#define COLOR_ENUM(X, G) \
+    X(G, RED) \
+    X(G, GREEN) \
+    X(G, BLUE)
 
 ENUMS_AUTOMATIC(COLOR);  // Add semicolon
 
 /* Define an HTTP status enum for testing manual value assignment
  * Demonstrates real-world enum usage with specific values */
-#define STATUS_ENUM(GENERATOR) \
-    GENERATOR(OK, 200), \
-    GENERATOR(NOT_FOUND, 404), \
-    GENERATOR(ERROR, 500)
+#define STATUS_ENUM(X, G) \
+    X(G, OK, 200) \
+    X(G, NOT_FOUND, 404) \
+    X(G, ERROR, 500)
 
 ENUMS_ASSIGNED(STATUS);
 /*
@@ -49,10 +49,10 @@ ENUMS_ASSIGNED(STATUS);
  */
 
 /* Define a Fruit enum to check for symbol collisions */
-#define FRUIT_ENUM(GENERATOR) \
-    GENERATOR(APPLE), \
-    GENERATOR(ORANGE), \
-    GENERATOR(BANANA)
+#define FRUIT_ENUM(X, G) \
+    X(G, APPLE) \
+    X(G, ORANGE) \
+    X(G, BANANA)
 
 ENUMS_AUTOMATIC(FRUIT);
 /*
@@ -69,15 +69,15 @@ ENUMS_AUTOMATIC(FRUIT);
  */
 
 /* Define a Priority enum with a custom score map */
-#define PRIORITY_ENUM(GENERATOR) \
-    GENERATOR(LOW, 1), \
-    GENERATOR(MEDIUM, 5), \
-    GENERATOR(HIGH, 10)
+#define PRIORITY_ENUM(X, G) \
+    X(G, LOW, 1) \
+    X(G, MEDIUM, 5) \
+    X(G, HIGH, 10)
 
-#define PRIORITY_SCORE_GEN(GENERATOR) \
-    GENERATOR(LOW, 0), \
-    GENERATOR(MEDIUM, 50), \
-    GENERATOR(HIGH, 100)
+#define PRIORITY_SCORE_GEN(X, G) \
+    X(G, LOW, 0) \
+    X(G, MEDIUM, 50) \
+    X(G, HIGH, 100)
 
 ENUMS_ASSIGNED(PRIORITY);
 ENUMS_ARRAY(PRIORITY, PRIORITY_SCORE_GEN, int, score);
@@ -94,12 +94,12 @@ ENUMS_ARRAY(PRIORITY, PRIORITY_SCORE_GEN, int, score);
  * - HIGH = 10 (Score: 100)
  */
 
-#define STATUS_DESC_GEN(GENERATOR) \
-    GENERATOR(OK, "All systems go"), \
-    GENERATOR(NOT_FOUND, "Resource missing"), \
-    GENERATOR(ERROR, "Internal failure")
+#define STATUS_DESC_GEN(X, G) \
+    X(G, OK, "All systems go") \
+    X(G, NOT_FOUND, "Resource missing") \
+    X(G, ERROR, "Internal failure")
 
-ENUMS_ARRAY(STATUS, STATUS_DESC_GEN, char*, description);
+ENUMS_ARRAY(STATUS, STATUS_DESC_GEN, const char*, description);
 /*
  * Generated Array: STATUS_description
  * -------------------------
