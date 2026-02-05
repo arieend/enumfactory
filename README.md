@@ -161,26 +161,20 @@ Since **EnumFactory** is a header-only library, there's no need for building or 
 ### Base Generation Macros
 
 - `ENUM(_, ...)`: Basic enum member generation (no special behavior).
-- `ENUM_INDEX(_, ...)`: Creates an array index accessor from an enum member.
-- `ENUM_STRING(_, ...)`: Converts an enum member name to a string literal.
 - `ENUM_VALUE_ASSIGN(_, _v, ...)`: Assigns a custom value to an enum member.
 
 ### Enum Implementation Macros
 
 - `ENUM_VALUE_MAP(_, _v, ...)`: Creates a map that associates enum members with values.
-- `ENUM_STRING_VALUE_MAP(_, _v, ...)`: Creates a map that associates enum members with string values.
 - `ENUM_STRING_SELF_MAP(_, ...)`: Creates a map that associates enum members with their own names as strings.
 - `ENUM_TOTAL(_)`: Defines the range of the enum (highest value + 1). Use for array allocations.
 - `ENUM_COUNT(_)`: Defines the actual number of members defined. Use for logic that needs to know how many options exist.
-- `_generate_enums(_enum, _generator)`: Generates the enum type using a specified member generator.
-- `_generate_enums_array(_enum, T, _suffix, _generator)`: Generates an array of values associated with the enum members.
+- `GENERATE_ENUM_CORE(_enum_name, _enum_list, _generator)`: Core macro used to generate the enum type and support structures.
 
 ### Arrays' Generator Macros
 
-- `ENUMS(_enum, _generator)`: Generates the enum type.
-- `ENUMS_ARRAY(_enum, _array_type, _array_suffix, _array_generator)`: Generates an array for the enum.
-- `ENUMS_MAP(_enum, _enum_generator, _array_type, _array_suffix, _array_generator)`: Generates both the enum and its associated array.
-- `ENUMS_BASE(_, _enum_generator)`: Generates enums and a default label array.
+- `ENUMS_ARRAY(_enum, _enum_list, _type, _suffix)`: Generates an array for the enum.
+- `ENUMS_MAP(_enum_name, _enum_list, _generator, _type, _suffix)`: Generates both the enum and its associated array in one shot.
 - `ENUMS_AUTOMATIC(_)`: Generates an enum with automatic values (0, 1, 2, ...) and a label array.
 - `ENUMS_ASSIGNED(_)`: Generates an enum with assigned values and a label array.
 

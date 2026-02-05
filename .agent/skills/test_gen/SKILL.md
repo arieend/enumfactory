@@ -23,14 +23,22 @@ void test_new_enum(void) {
     // Value checks
     assert(MEMBER_1 == 0);
     assert(NEW_ENUM_total == 2);
+    assert(ENUM_TOTAL(NEW_ENUM) == 2);
+    assert(ENUM_COUNT(NEW_ENUM) == 2);
 
     // String checks
     // Prefer _to_string or _get_label accessor over direct array access
     assert(strcmp(NEW_ENUM_to_string(MEMBER_1), "MEMBER_1") == 0);
+    assert(strcmp(NEW_ENUM_label[MEMBER_1], "MEMBER_1") == 0); // optional direct access check
 
     // Safety checks
     assert(ENUM_IS_VALID(NEW_ENUM, MEMBER_1));
     assert(!ENUM_IS_VALID(NEW_ENUM, -1));
+    assert(!ENUM_IS_VALID(NEW_ENUM, NEW_ENUM_total));
+
+    // String Conversion Macro
+    ENUM_TO_STRING(NEW_ENUM);
+    assert(strcmp(NEW_ENUM_to_string(MEMBER_1), "MEMBER_1") == 0);
 
     // Safe Array Access (if map exists)
     // assert(ENUM_SAFE_ARRAY_ACCESS(NEW_ENUM_score, NEW_ENUM, MEMBER_1) == 0);
