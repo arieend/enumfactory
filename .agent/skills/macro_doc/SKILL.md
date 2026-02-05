@@ -59,6 +59,39 @@ ENUMS_AUTOMATIC(COLOR)
  */
 ```
 
+### Example (Map)
+
+Input:
+
+```c
+#define PRIORITY_ENUM(X, G) \
+    X(G, LOW, 1) \
+    X(G, HIGH, 10)
+
+#define PRIORITY_SCORE_GEN(X, G) \
+    X(G, LOW, 0) \
+    X(G, HIGH, 100)
+
+ENUMS_ASSIGNED(PRIORITY);
+ENUMS_ARRAY(PRIORITY, PRIORITY_SCORE_GEN, int, score);
+```
+
+Output with Skill:
+
+```c
+/*
+ * Generated Enum: PRIORITY
+ * -------------------------
+ * Type: Map (Enum and Score Array)
+ * Actual Member Count: 2
+ * Range (total): 0 to 11 (exclusive)
+ *
+ * Members & Values:
+ * - LOW = 1 (Score: 0)
+ * - HIGH = 10 (Score: 100)
+ */
+```
+
 ## Rationale
 
 Since X-macros expand during compilation, they are "invisible" in the source code. This documentation makes the intended expansion explicit for developers, improving code readability and debugging.
