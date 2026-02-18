@@ -1,97 +1,60 @@
 ---
-name: macro_doc
-description: Detailed documentation for EnumFactory macro generation
+name: macro-doc
+description: Generate deterministic inline documentation blocks for EnumFactory X-macro expansions. Use when adding or modifying enums built with ENUMS_AUTOMATIC, ENUMS_ASSIGNED, ENUMS_ARRAY, or ENUMS_MAP so generated values, count, and range are explicit in source.
 ---
 
 # Macro Documentation Skill
 
-This skill ensures that whenever the EnumFactory library is used to generate enums or maps, a detailed comment block is provided to explain the resulting values and structures.
+Create a comment block immediately after every enum generation macro call.
 
-## Usage Guidelines
-
-When you (the agent) generate an enum using `ENUMS_AUTOMATIC`, `ENUMS_ASSIGNED`, or `ENUMS_MAP`, you MUST include a comment block immediately following the generation.
-
-### Comment Format
+## Apply this output format
 
 ```c
 /*
- * Generated Enum: [EnumName]
- * -------------------------
- * Type: [Automatic | Assigned | Map]
- * Actual Member Count: [Count]
- * Range (total): [0 to Total-1]
+ * Generated Enum: <ENUM_NAME>
+ * Type: <Automatic|Assigned|Map>
+ * Actual Member Count: <N>
+ * Range (total): 0 to <ENUM_total - 1> (exclusive upper bound: <ENUM_total>)
  *
  * Members & Values:
- * - [Member1] = [Value1] ([Label1])
- * - [Member2] = [Value2] ([Label2])
- * ...
+ * - <MEMBER_A> = <VALUE_A> ("<LABEL_A>")
+ * - <MEMBER_B> = <VALUE_B> ("<LABEL_B>")
  */
 ```
 
-### Example
+## Compute values correctly
 
-Input:
+- Use `ENUM_COUNT(<ENUM>)` for `Actual Member Count`.
+- Use `ENUM_TOTAL(<ENUM>)` for range end (`exclusive upper bound`).
+- For assigned enums, include sparse values exactly as declared.
+- For map arrays (`ENUMS_ARRAY`/`ENUMS_MAP`), add mapped payload when relevant:
 
 ```c
-#define COLOR_ENUM(GENERATOR) \
-    GENERATOR(RED), \
-    GENERATOR(BLUE)
-ENUMS_AUTOMATIC(COLOR)
+ * - <MEMBER> = <VALUE> (Score: <MAPPED_VALUE>)
 ```
 
-Output with Skill:
+## Placement rules
+
+- Place the block directly under `ENUMS_AUTOMATIC(...)`, `ENUMS_ASSIGNED(...)`, or `ENUMS_MAP(...)`.
+- Keep one block per generated enum.
+- Keep wording stable to reduce diff noise.
+
+## Minimal example
 
 ```c
-#define COLOR_ENUM(GENERATOR) \
-    GENERATOR(RED), \
-    GENERATOR(BLUE)
-ENUMS_AUTOMATIC(COLOR)
+#define STATUS_ENUM(X, G) \
+    X(G, OK, 200) \
+    X(G, NOT_FOUND, 404)
+
+ENUMS_ASSIGNED(STATUS)
 /*
- * Generated Enum: COLOR
- * -------------------------
- * Type: Automatic
+ * Generated Enum: STATUS
+ * Type: Assigned
  * Actual Member Count: 2
- * Range (total): 0 to 2 (exclusive)
+ * Range (total): 0 to 404 (exclusive upper bound: 405)
  *
  * Members & Values:
- * - RED = 0 ("RED")
- * - BLUE = 1 ("BLUE")
+ * - OK = 200 ("OK")
+ * - NOT_FOUND = 404 ("NOT_FOUND")
  */
 ```
-
-### Example (Map)
-
-Input:
-
-```c
-#define PRIORITY_ENUM(X, G) \
-    X(G, LOW, 1) \
-    X(G, HIGH, 10)
-
-#define PRIORITY_SCORE_GEN(X, G) \
-    X(G, LOW, 0) \
-    X(G, HIGH, 100)
-
-ENUMS_ASSIGNED(PRIORITY);
-ENUMS_ARRAY(PRIORITY, PRIORITY_SCORE_GEN, int, score);
-```
-
-Output with Skill:
-
-```c
-/*
- * Generated Enum: PRIORITY
- * -------------------------
- * Type: Map (Enum and Score Array)
- * Actual Member Count: 2
- * Range (total): 0 to 11 (exclusive)
- *
- * Members & Values:
- * - LOW = 1 (Score: 0)
- * - HIGH = 10 (Score: 100)
- */
-```
-
-## Rationale
-
-Since X-macros expand during compilation, they are "invisible" in the source code. This documentation makes the intended expansion explicit for developers, improving code readability and debugging.

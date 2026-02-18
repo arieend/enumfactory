@@ -1,46 +1,56 @@
 ---
-name: test_gen
-description: Standard pattern for testing EnumFactory enums
+name: test-gen
+description: Generate focused C tests for EnumFactory enums in test/enumfactory_test.c. Use when a new enum or enum map is added or changed to verify values, count/range semantics, labels, to_string behavior, and safety macros.
 ---
 
 # Test Generation Skill
 
-This skill ensures that new enums are accompanied by comprehensive tests in `test/enumfactory_test.c`.
+Add or update one test function per enum change in `test/enumfactory_test.c`.
 
-## Test Requirements
+## Required assertions
 
-When adding a new enum, create a `void test_enum_name_lower` function that validates:
+1. Value assertions
+- Verify each critical enum member value.
+- For assigned enums, verify sparse values explicitly.
 
-1. **Values**: Assert specific enum members match expected integers.
-2. **Count**: Assert `[ENUM]_total` and `ENUM_COUNT([ENUM])` are correct.
-3. **Strings**: Assert `[ENUM]_to_string` or `[ENUM]_label` returns correct strings.
-4. **Safety**: Use `ENUM_IS_VALID` and `ENUM_SAFE_ARRAY_ACCESS` to test boundary conditions.
+2. Count and range assertions
+- Assert `ENUM_COUNT(<ENUM>)` equals logical member count.
+- Assert `ENUM_TOTAL(<ENUM>)` equals max-value-plus-one range end.
 
-## Template
+3. String/label assertions
+- Call `ENUM_TO_STRING(<ENUM>)` once in scope if needed.
+- Assert `<ENUM>_to_string(value)` and/or `<ENUM>_get_label(value)` for representative members.
+
+4. Safety assertions
+- Verify `ENUM_IS_VALID(<ENUM>, valid_value)` is true.
+- Verify negative, gap, and out-of-range values are false.
+- If map arrays exist, verify `ENUM_SAFE_ARRAY_ACCESS` returns expected value for valid index and `NULL`/zero for invalid index.
+
+## Test template
 
 ```c
-void test_new_enum(void) {
-    // Value checks
-    assert(MEMBER_1 == 0);
-    assert(NEW_ENUM_total == 2);
-    assert(ENUM_TOTAL(NEW_ENUM) == 2);
-    assert(ENUM_COUNT(NEW_ENUM) == 2);
+void test_status_enum(void) {
+    ENUM_TO_STRING(STATUS);
 
-    // String checks
-    // Prefer _to_string or _get_label accessor over direct array access
-    assert(strcmp(NEW_ENUM_to_string(MEMBER_1), "MEMBER_1") == 0);
-    assert(strcmp(NEW_ENUM_label[MEMBER_1], "MEMBER_1") == 0); // optional direct access check
+    assert(STATUS_OK == 200);
+    assert(STATUS_NOT_FOUND == 404);
 
-    // Safety checks
-    assert(ENUM_IS_VALID(NEW_ENUM, MEMBER_1));
-    assert(!ENUM_IS_VALID(NEW_ENUM, -1));
-    assert(!ENUM_IS_VALID(NEW_ENUM, NEW_ENUM_total));
+    assert(ENUM_COUNT(STATUS) == 2);
+    assert(ENUM_TOTAL(STATUS) == 405);
 
-    // String Conversion Macro
-    ENUM_TO_STRING(NEW_ENUM);
-    assert(strcmp(NEW_ENUM_to_string(MEMBER_1), "MEMBER_1") == 0);
+    assert(strcmp(STATUS_to_string(STATUS_OK), "STATUS_OK") == 0);
+    assert(strcmp(STATUS_get_label(STATUS_NOT_FOUND), "STATUS_NOT_FOUND") == 0);
 
-    // Safe Array Access (if map exists)
-    // assert(ENUM_SAFE_ARRAY_ACCESS(NEW_ENUM_score, NEW_ENUM, MEMBER_1) == 0);
+    assert(ENUM_IS_VALID(STATUS, 200));
+    assert(!ENUM_IS_VALID(STATUS, 201));
+    assert(!ENUM_IS_VALID(STATUS, -1));
+    assert(!ENUM_IS_VALID(STATUS, 405));
 }
 ```
+
+## Implementation rules
+
+- Use deterministic function names: `test_<enum_name_lower>_*`.
+- Keep assertions narrow and behavior-oriented.
+- Prefer adding to existing test sections instead of creating duplicate coverage.
+- Include at least one boundary assertion for every changed enum.
