@@ -171,7 +171,34 @@ int main() {
 
 ---
 
-## 7. Explanation of Type-Safety Limits in C
+---
+
+## 7. Parallel Map Generation (ENUMS_MAP) Example
+
+To simultaneously generate an enum and a lookup function mapping each enum value to another type (like an `int` code or `const char*` description), use the `ENUMS_MAP` generator:
+
+```c
+#include <stdio.h>
+#include "enumfactorymacros.h"
+
+// 1. Define the enum and its corresponding mapped values
+#define EVENT_ENUM(X, G) \
+    X(G, CLICK, 100)     \
+    X(G, HOVER, 200)
+
+// 2. Generate the ENUM, count, strings, AND a int-returning _get_code(int value) function
+ENUMS_MAP(EVENT, EVENT_ENUM, ENUM, int, code);
+
+int main() {
+    printf("Hover event code: %d\n", EVENT_get_code(HOVER)); // Outputs 200
+    printf("Unknown event code: %d\n", EVENT_get_code(999)); // Safe fallback, outputs 0
+    return 0;
+}
+```
+
+---
+
+## 8. Explanation of Type-Safety Limits in C
 
 C enums possess remarkably weak typing—falling back into arbitrary integers natively (`int` representations).
 
@@ -183,7 +210,7 @@ The Macro Factory is purposefully designed to accommodate integer pollution whil
 
 ---
 
-## 8. Error Handling Strategy
+## 9. Error Handling Strategy
 
 The strategy targets complete fault tolerance with unsafe/corrupted enum values:
 

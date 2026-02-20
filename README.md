@@ -30,7 +30,7 @@ Since **EnumFactory** is a header-only library, there's no need for building or 
        X(G, BLUE)
    ```
 
-2. **Generate the Enum:** Use the `ENUMS_AUTOMATIC` or `ENUMS_ASSIGNED` macro to generate the enum type and associated lookup functions.
+2. **Generate the Enum:** Use the `ENUMS_AUTOMATIC`, `ENUMS_ASSIGNED`, or `ENUMS_MAP` macro to generate the enum type and associated lookup functions.
    - **Automatic Value Assignment:**
 
      ```c
@@ -46,6 +46,17 @@ Since **EnumFactory** is a header-only library, there's no need for building or 
          X(G, ERROR, 500)
 
      ENUMS_ASSIGNED(HTTP_STATUS);
+     ```
+
+   - **Parallel Map Generation:**
+
+     ```c
+     #define EVENT_ENUM(X, G) \
+         X(G, CLICK, 100) \
+         X(G, HOVER, 200)
+
+     ENUMS_MAP(EVENT, EVENT_ENUM, ENUM, int, code);
+     // Provides EVENT_get_code(int value) -> returns the mapped 100 or 200
      ```
 
 3. **Using the Enum:** Access the generated enum, strings, and safety features.

@@ -124,6 +124,16 @@ ENUM_TO_STRING(COLOR);
 ENUM_TO_STRING(FRUIT);
 ENUM_TO_STRING(STATUS);
 ENUM_TO_STRING(PRIORITY);
+
+/* Test ENUMS_MAP which generates both enum and array at the same time */
+#define EVENT_ENUM(X, G) \
+    X(G, CLICK, 100) \
+    X(G, HOVER, 200) \
+    X(G, SCROLL, 300)
+
+ENUMS_MAP(EVENT, EVENT_ENUM, ENUM, int, code);
+ENUM_TO_STRING(EVENT);
+
 /*
  * Generated Array: STATUS_description
  * -------------------------
@@ -212,6 +222,23 @@ void test_status_description(void) {
     assert(strcmp(STATUS_get_description(NOT_FOUND), "Resource missing") == 0);
     assert(STATUS_get_description(201) == NULL);
 }
+
+/* Test ENUMS_MAP macro */
+void test_enums_map(void) {
+    assert(CLICK == 0);
+    assert(HOVER == 1);
+    assert(SCROLL == 2);
+    assert(EVENT_total == 3);
+    assert(ENUM_COUNT(EVENT) == 3);
+
+    assert(EVENT_get_code(CLICK) == 100);
+    assert(EVENT_get_code(HOVER) == 200);
+    assert(EVENT_get_code(SCROLL) == 300);
+    assert(EVENT_get_code(99) == 0);
+
+    assert(strcmp(EVENT_get_label(CLICK), "CLICK") == 0);
+}
+
 
 
 /* Test safety features and bounds checking
@@ -324,6 +351,10 @@ int main(void) {
 
     test_status_description();
     printf("Status description tests passed\n");
+
+    test_enums_map();
+    printf("ENUMS_MAP tests passed\n");
+
 
     printf("All tests passed successfully!\n");
     return 0;

@@ -29,7 +29,17 @@ _Note: Do not use trailing commas or semicolons inside the macro definition._
 
 - `ENUMS_AUTOMATIC(NAME)`: Generates `enum NAME` with sequential values (0, 1, ...).
 - `ENUMS_ASSIGNED(NAME)`: Generates `enum NAME` with explicit values.
-- `ENUMS_MAP(...)`: Generates parallel arrays (e.g., string descriptions).
+- `ENUMS_MAP(NAME, ENUM_LIST, GENERATOR, MAP_TYPE, SUFFIX)`: Generates both `enum NAME` and a parallel function mapping `NAME_get_<SUFFIX>(int value)`.
+  **Example:**
+
+  ```c
+  #define EVENT_ENUM(X, G) \
+      X(G, CLICK, 10) \
+      X(G, HOVER, 20)
+
+  // Generates enum EVENT and a function 'int EVENT_get_code(int value)'
+  ENUMS_MAP(EVENT, EVENT_ENUM, ENUM, int, code);
+  ```
 
 ### 3. Documentation Requirement
 
