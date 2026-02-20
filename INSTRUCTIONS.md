@@ -29,16 +29,20 @@ _Note: Do not use trailing commas or semicolons inside the macro definition._
 
 - `ENUMS_AUTOMATIC(NAME)`: Generates `enum NAME` with sequential values (0, 1, ...).
 - `ENUMS_ASSIGNED(NAME)`: Generates `enum NAME` with explicit values.
+- `ENUMS_ARRAY(NAME, ENUM_LIST, MAP_TYPE, SUFFIX, [INDEX])`: Generates a parallel function mapping `NAME_get_<SUFFIX>(int value)`. Takes an optional 5th parameter `INDEX` (0-7, defaults to 0) to extract specific attribute columns.
 - `ENUMS_MAP(NAME, ENUM_LIST, GENERATOR, MAP_TYPE, SUFFIX)`: Generates both `enum NAME` and a parallel function mapping `NAME_get_<SUFFIX>(int value)`.
   **Example:**
 
   ```c
   #define EVENT_ENUM(X, G) \
-      X(G, CLICK, 10) \
-      X(G, HOVER, 20)
+      X(G, CLICK, 10, "mouse") \
+      X(G, HOVER, 20, "mouse")
 
   // Generates enum EVENT and a function 'int EVENT_get_code(int value)'
-  ENUMS_MAP(EVENT, EVENT_ENUM, ENUM, int, code);
+  ENUMS_MAP(EVENT, EVENT_ENUM, ENUM_VALUE_ASSIGN, int, code);
+
+  // Generates a function 'const char* EVENT_get_device(int value)' from index 1
+  ENUMS_ARRAY(EVENT, EVENT_ENUM, const char*, device, 1);
   ```
 
 ### 3. Documentation Requirement

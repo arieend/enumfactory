@@ -89,28 +89,31 @@ ENUMS_AUTOMATIC(FRUIT);
     X(G, MEDIUM, 5) \
     X(G, HIGH, 10)
 
-/* Parallel Data Generation 
- * This second macro allows us to generate a Score array that aligns with the Priority enum.
- * Note how it reuses the same keys (LOW, MEDIUM, HIGH) but maps them to different values (0, 50, 100).
+/* Parallel Data Generation (Multi-Attribute)
+ * This macro allows us to generate multiple data arrays that align with the Priority enum.
+ * By reusing the X-macro structure, different fields are extracted using index parameters.
  */
 #define PRIORITY_SCORE_GEN(X, G) \
-    X(G, LOW, 0) \
-    X(G, MEDIUM, 50) \
-    X(G, HIGH, 100)
+    X(G, LOW, 0, 0.1f, "just", 3300) \
+    X(G, MEDIUM, 50, 0.11f, "trest", 2000) \
+    X(G, HIGH, 100, 0.9f, "test1", 1000)
 
 ENUMS_ASSIGNED(PRIORITY);
 ENUMS_ARRAY(PRIORITY, PRIORITY_SCORE_GEN, int, score);
+ENUMS_ARRAY(PRIORITY, PRIORITY_SCORE_GEN, float, rate, 1);
+ENUMS_ARRAY(PRIORITY, PRIORITY_SCORE_GEN, const char*, word, 2);
+ENUMS_ARRAY(PRIORITY, PRIORITY_SCORE_GEN, int, amount, 3);
 /*
  * Generated Enum: PRIORITY
  * -------------------------
- * Type: Map (Enum and Score Array)
+ * Type: Map (Enum and Multi-Attribute Arrays)
  * Actual Member Count: 3
  * Range (total): 0 to 11 (exclusive)
  *
- * Members & Values:
- * - LOW = 1 (Score: 0)
- * - MEDIUM = 5 (Score: 50)
- * - HIGH = 10 (Score: 100)
+ * Mappings:
+ * - LOW = 1 (Score: 0, Rate: 0.1, Word: "just", Amount: 3300)
+ * - MEDIUM = 5 (Score: 50, Rate: 0.11, Word: "trest", Amount: 2000)
+ * - HIGH = 10 (Score: 100, Rate: 0.9, Word: "test1", Amount: 1000)
  */
 
 #define STATUS_DESC_GEN(X, G) \
@@ -202,14 +205,34 @@ void test_priority_map(void) {
     assert(HIGH == 10);
     assert(PRIORITY_total == 11);
 
-    // Test the score map using getter
+    // Test the score map using getter (index 0)
     assert(PRIORITY_get_score(LOW) == 0);
     assert(PRIORITY_get_score(MEDIUM) == 50);
     assert(PRIORITY_get_score(HIGH) == 100);
 
-    // Test safe access to score map
+    // Test the rate map using getter (index 1)
+    // Float comparison is tricky, but exact assignment from macro should match
+    assert(PRIORITY_get_rate(LOW) == 0.1f);
+    assert(PRIORITY_get_rate(MEDIUM) == 0.11f);
+    assert(PRIORITY_get_rate(HIGH) == 0.9f);
+
+    // Test the word map using getter (index 2)
+    assert(strcmp(PRIORITY_get_word(LOW), "just") == 0);
+    assert(strcmp(PRIORITY_get_word(MEDIUM), "trest") == 0);
+    assert(strcmp(PRIORITY_get_word(HIGH), "test1") == 0);
+
+    // Test the amount map using getter (index 3)
+    assert(PRIORITY_get_amount(LOW) == 3300);
+    assert(PRIORITY_get_amount(MEDIUM) == 2000);
+    assert(PRIORITY_get_amount(HIGH) == 1000);
+
+    // Test safe access to maps (bounds)
     assert(PRIORITY_get_score(MEDIUM) == 50);
     assert(PRIORITY_get_score(99) == 0);
+
+    assert(PRIORITY_get_rate(99) == 0.0f);
+    assert(PRIORITY_get_word(99) == NULL);
+    assert(PRIORITY_get_amount(99) == 0);
 }
 
 void test_priority_count(void) {

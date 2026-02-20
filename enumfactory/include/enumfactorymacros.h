@@ -59,6 +59,24 @@
 #define ENUM_SWITCH_CASE_LABEL_(_1, ...) case _1: return #_1;
 #define ENUM_SWITCH_CASE_VAL_(_1, ...) case _1: return ENUM_VALUE_MAP_VAL_(__VA_ARGS__, _1);
 
+#define ENUM_VALUE_MAP_VAL_0(_0, ...) _0
+#define ENUM_VALUE_MAP_VAL_1(_0, _1, ...) _1
+#define ENUM_VALUE_MAP_VAL_2(_0, _1, _2, ...) _2
+#define ENUM_VALUE_MAP_VAL_3(_0, _1, _2, _3, ...) _3
+#define ENUM_VALUE_MAP_VAL_4(_0, _1, _2, _3, _4, ...) _4
+#define ENUM_VALUE_MAP_VAL_5(_0, _1, _2, _3, _4, _5, ...) _5
+
+/* Zero padding avoids compiler errors if generators don't have enough arguments */
+#define ENUM_SWITCH_CASE_VAL_0(_1, ...) case _1: return ENUM_VALUE_MAP_VAL_0(__VA_ARGS__, 0, 0, 0, 0, 0, 0);
+#define ENUM_SWITCH_CASE_VAL_1(_1, ...) case _1: return ENUM_VALUE_MAP_VAL_1(__VA_ARGS__, 0, 0, 0, 0, 0, 0);
+#define ENUM_SWITCH_CASE_VAL_2(_1, ...) case _1: return ENUM_VALUE_MAP_VAL_2(__VA_ARGS__, 0, 0, 0, 0, 0, 0);
+#define ENUM_SWITCH_CASE_VAL_3(_1, ...) case _1: return ENUM_VALUE_MAP_VAL_3(__VA_ARGS__, 0, 0, 0, 0, 0, 0);
+#define ENUM_SWITCH_CASE_VAL_4(_1, ...) case _1: return ENUM_VALUE_MAP_VAL_4(__VA_ARGS__, 0, 0, 0, 0, 0, 0);
+#define ENUM_SWITCH_CASE_VAL_5(_1, ...) case _1: return ENUM_VALUE_MAP_VAL_5(__VA_ARGS__, 0, 0, 0, 0, 0, 0);
+
+#define _ENUMS_CONCAT_IMPL(a, b) a ## b
+#define _ENUMS_CONCAT(a, b) _ENUMS_CONCAT_IMPL(a, b)
+
 /* Invokers
  * --------
  * These helper macros control how the generator list is expanded.
@@ -125,17 +143,31 @@ static inline const char* _enum_name ## _get_label(int value) { \
  *
  * ENUMS_ARRAY: Generates a lookup array for an existing map of values.
  *              Used when you want to map Enum -> Arbitrary Data.
+ *              Accepts an optional 5th argument specifying the column/index
+ *              within the generator macro tuple to extract (0-7, defaults to 0).
  *
  * ENUMS_MAP: A convenience wrapper that generates both the core enum
  *            AND a parallel data array in one shot.
  */
-#define ENUMS_ARRAY(_enum_name, _enum_list, _type, _suffix) \
+#define _ENUMS_ARRAY_IMPL(_enum_name, _enum_list, _type, _suffix, _index) \
 static inline _type _enum_name ## _get_ ## _suffix(int value) { \
     switch(value) { \
-        _enum_list(_X_CALL, ENUM_SWITCH_CASE_VAL_) \
+        _enum_list(_X_CALL, _ENUMS_CONCAT(ENUM_SWITCH_CASE_VAL_, _index)) \
         default: return (_type)0; \
     } \
 }
+
+#define _ENUMS_ARRAY_4(enum_name, enum_list, type, suffix) \
+    _ENUMS_ARRAY_IMPL(enum_name, enum_list, type, suffix, 0)
+
+#define _ENUMS_ARRAY_5(enum_name, enum_list, type, suffix, index) \
+    _ENUMS_ARRAY_IMPL(enum_name, enum_list, type, suffix, index)
+
+#define _ENUMS_ARRAY_GET_MACRO(_1, _2, _3, _4, _5, NAME, ...) NAME
+
+/* ENUMS_ARRAY accepts either 4 args (defaults to index 0) or 5 args (explicit index) */
+#define ENUMS_ARRAY(...) \
+    _ENUMS_ARRAY_GET_MACRO(__VA_ARGS__, _ENUMS_ARRAY_5, _ENUMS_ARRAY_4)(__VA_ARGS__)
 
 #define ENUMS_MAP(_enum_name, _enum_list, _generator, _type, _suffix) \
 GENERATE_ENUM_CORE(_enum_name, _enum_list, _generator) \

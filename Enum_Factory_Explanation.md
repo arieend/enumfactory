@@ -109,7 +109,7 @@ static inline const char* HTTP_STATUS_get_label(int value) {
 
 ### Parallel Array Maps Flow (`ENUMS_MAP`)
 
-```text
+````text
                    +-------------------+
                    |     ENUMS_MAP     |
                    +--------+----------+
@@ -117,12 +117,27 @@ static inline const char* HTTP_STATUS_get_label(int value) {
            +----------------+----------------+
            |                                 |
            v                                 v
-   GENERATE_ENUM_CORE                   ENUMS_ARRAY
+   GENERATE_ENUM_CORE                   ENUMS_ARRAY (index 0)
     (Base Enum & Labels)           (Parallel Lookup Array)
            |                                 |
            v                                 v
    enum { ... }                   static inline _type _get_value()
-```
+
+### Multi-Attribute Maps Flow (ENUMS_ARRAY with indices)
+
+Multiple `ENUMS_ARRAY` calls can target the same list with different indices:
+
+```text
+               +----------------------------------+
+               |      complex_ENUM(X, G)          |
+               +----------------------------------+
+                 /              |               \
+                v               v                v
+     ENUMS_ARRAY(..., 0)  ENUMS_ARRAY(..., 1) ENUMS_ARRAY(..., 2)
+       (_get_score)         (_get_rate)         (_get_name)
+````
+
+````
 
 ---
 
@@ -167,7 +182,7 @@ int main() {
 
     return 0;
 }
-```
+````
 
 ---
 
@@ -198,7 +213,33 @@ int main() {
 
 ---
 
-## 8. Explanation of Type-Safety Limits in C
+## 8. Multi-Attribute Parallel Map Generation
+
+Data points often possess multiple pieces of metadata. The generator macro can define arbitrary tuple lengths, and `ENUMS_ARRAY` can meticulously extract specific columns using the optional 5th parameter (the index, starting from 0):
+
+```c
+#include <stdio.h>
+#include "enumfactorymacros.h"
+
+#define PRODUCT_ENUM(X, G) \
+    X(G, LAPTOP, 1, 999.99f, "Computer") \
+    X(G, MOUSE,  2, 49.99f,  "Accessory")
+
+// Base enum and basic code mapping (index 0)
+ENUMS_MAP(PRODUCT, PRODUCT_ENUM, ENUM_VALUE_ASSIGN, int, code);
+
+// Explicit extraction mappings
+ENUMS_ARRAY(PRODUCT, PRODUCT_ENUM, float, price, 1);       // Index 1
+ENUMS_ARRAY(PRODUCT, PRODUCT_ENUM, const char*, type, 2);  // Index 2
+
+int main() {
+    printf("Laptop price: %f\n", PRODUCT_get_price(LAPTOP));
+    printf("Laptop type: %s\n", PRODUCT_get_type(LAPTOP));
+    return 0;
+}
+```
+
+## 9. Explanation of Type-Safety Limits in C
 
 C enums possess remarkably weak typing—falling back into arbitrary integers natively (`int` representations).
 
@@ -208,9 +249,7 @@ COLOR my_color = 999; // C compiler accepts this seamlessly.
 
 The Macro Factory is purposefully designed to accommodate integer pollution while shielding structural integrity. Because the bounds functions demand precise numerical matches, accessing an array element out-of-parameter via `ENUM_SAFE_ARRAY_ACCESS` or `ENUM_IS_VALID` behaves deterministically by rejecting rogue values. The X-macro wrapper applies pseudo-strict bounds testing despite language-level omissions.
 
----
-
-## 9. Error Handling Strategy
+## 10. Error Handling Strategy
 
 The strategy targets complete fault tolerance with unsafe/corrupted enum values:
 

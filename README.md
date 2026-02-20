@@ -6,12 +6,14 @@
 
 ## Key Features
 
-- **Automatic String Conversion:** Easily convert enum members to their string representations without manual `switch` statements.
-- **Value Mapping:** Create custom maps that associate enum members with specific values (strings or integers).
-- **Type-Safe Access:** Access enum-related data in a safe manner, returning `NULL` or neutral elements on out-of-bounds indices.
-- **Bounds Checking:** Perform compile-time count evaluations and runtime bounds checks to ensure that enum values are valid.
-- **Array Generation:** Automatically generate parallel arrays or lookup switches indexed by enum members.
-- **Automatic and Assigned Enum Values:** Allows for automatic enum value assignation (0, 1, 2...) or custom value assignation.
+| Feature                         | Description                                                                                                      |
+| ------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| **Automatic String Conversion** | Easily convert enum members to their string representations without manual `switch` statements.                  |
+| **Value Mapping**               | Create custom maps that associate enum members with specific values (strings or integers).                       |
+| **Multi-Attribute Arrays**      | Automatically generate parallel arrays extracting different values from a single macro definition using indices. |
+| **Type-Safe Access**            | Access enum-related data safely, returning `NULL` or neutral elements on out-of-bounds indices.                  |
+| **Bounds Checking**             | Perform compile-time count evaluations and runtime bounds checks to ensure validity.                             |
+| **Automatic/Assigned Values**   | Supports both automatic enum values (0, 1, 2...) and custom value assignment.                                    |
 
 ## Getting Started
 
@@ -59,6 +61,19 @@ Since **EnumFactory** is a header-only library, there's no need for building or 
      // Provides EVENT_get_code(int value) -> returns the mapped 100 or 200
      ```
 
+   - **Multi-Attribute Arrays:**
+
+     ```c
+     #define PRIORITY_ENUM(X, G) \
+         X(G, LOW, 0, 0.1f, "low_priority") \
+         X(G, HIGH, 100, 0.9f, "high_priority")
+
+     ENUMS_ASSIGNED(PRIORITY);
+     ENUMS_ARRAY(PRIORITY, PRIORITY_ENUM, int, score);           // Defaults to index 0
+     ENUMS_ARRAY(PRIORITY, PRIORITY_ENUM, float, rate, 1);       // Extracts index 1
+     ENUMS_ARRAY(PRIORITY, PRIORITY_ENUM, const char*, name, 2); // Extracts index 2
+     ```
+
 3. **Using the Enum:** Access the generated enum, strings, and safety features.
 
    ```c
@@ -103,7 +118,7 @@ Since **EnumFactory** is a header-only library, there's no need for building or 
 
 - `ENUMS_AUTOMATIC(_enum_name)`: Generates an enum with automatic values (0, 1, 2, ...) and an inline function `_enum_name_get_label(int)` leveraging jump tables.
 - `ENUMS_ASSIGNED(_enum_name)`: Generates an enum with explicit compiler-assigned values.
-- `ENUMS_ARRAY(_enum_name, _enum_list, _type, _suffix)`: Generates an arbitrary parallel mapping (e.g. enum -> score integers).
+- `ENUMS_ARRAY(_enum_name, _enum_list, _type, _suffix, [index])`: Generates an arbitrary parallel mapping (e.g. enum -> score integers). The `index` parameter is optional (defaults to 0) and dictates which element from the macro tuple to extract (0 to 7).
 - `ENUMS_MAP(_enum_name, _enum_list, _generator, _type, _suffix)`: Generates both the enum and its associated parallel mapping in one shot.
 
 ### Constants Generated
