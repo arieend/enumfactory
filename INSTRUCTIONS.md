@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-EnumFactory is a header-only C++ library that automates enum generation using X-Macros. It provides string conversion, iteration, and safety checks without runtime overhead.
+EnumFactory is a header-only C library (usable in C++) that automates enum generation using X-Macros. It provides string conversion, iteration, and safety checks without runtime overhead.
 
 ## Key Files
 

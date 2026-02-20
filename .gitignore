@@ -1,0 +1,7 @@
+*.o
+*.exe
+*.so
+*.a
+*.log
+enumfactory_test
+test_neg

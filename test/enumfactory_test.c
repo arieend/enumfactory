@@ -151,9 +151,9 @@ void test_automatic_enum(void) {
     assert(COLOR_total == 3);
     assert(ENUM_COUNT(COLOR) == 3);
 
-    assert(strcmp(COLOR_label[RED], "RED") == 0);
-    assert(strcmp(COLOR_label[GREEN], "GREEN") == 0);
-    assert(strcmp(COLOR_label[BLUE], "BLUE") == 0);
+    assert(strcmp(COLOR_get_label(RED), "RED") == 0);
+    assert(strcmp(COLOR_get_label(GREEN), "GREEN") == 0);
+    assert(strcmp(COLOR_get_label(BLUE), "BLUE") == 0);
 
     assert(strcmp(COLOR_get_label(RED), "RED") == 0);
     assert(strcmp(COLOR_get_label(RED), "RED") == 0);
@@ -173,9 +173,9 @@ void test_assigned_enum(void) {
     assert(STATUS_total == 501); // Highest value (500) + 1
     assert(ENUM_COUNT(STATUS) == 3);
 
-    assert(strcmp(STATUS_label[OK], "OK") == 0);
-    assert(strcmp(STATUS_label[NOT_FOUND], "NOT_FOUND") == 0);
-    assert(strcmp(STATUS_label[ERROR], "ERROR") == 0);
+    assert(strcmp(STATUS_get_label(OK), "OK") == 0);
+    assert(strcmp(STATUS_get_label(NOT_FOUND), "NOT_FOUND") == 0);
+    assert(strcmp(STATUS_get_label(ERROR), "ERROR") == 0);
 }
 
 /* Test multi-enum collision and basic properties */
@@ -192,10 +192,10 @@ void test_priority_map(void) {
     assert(HIGH == 10);
     assert(PRIORITY_total == 11);
 
-    // Test the score map
-    assert(PRIORITY_score[LOW] == 0);
-    assert(PRIORITY_score[MEDIUM] == 50);
-    assert(PRIORITY_score[HIGH] == 100);
+    // Test the score map using getter
+    assert(PRIORITY_get_score(LOW) == 0);
+    assert(PRIORITY_get_score(MEDIUM) == 50);
+    assert(PRIORITY_get_score(HIGH) == 100);
 
     // Test safe access to score map
     assert(PRIORITY_get_score(MEDIUM) == 50);
@@ -208,7 +208,7 @@ void test_priority_count(void) {
 
 /* Test custom string maps */
 void test_status_description(void) {
-    assert(strcmp(STATUS_description[OK], "All systems go") == 0);
+    assert(strcmp(STATUS_get_description(OK), "All systems go") == 0);
     assert(strcmp(STATUS_get_description(NOT_FOUND), "Resource missing") == 0);
     assert(STATUS_get_description(201) == NULL);
 }
@@ -230,10 +230,11 @@ void test_enum_safety(void) {
     assert(!ENUM_IS_VALID(COLOR, -1));
     assert(!ENUM_IS_VALID(COLOR, COLOR_total));
 
-    // Test safe access
-    assert(ENUM_SAFE_ARRAY_ACCESS(COLOR_label, COLOR, RED) != NULL);
-    assert(ENUM_SAFE_ARRAY_ACCESS(COLOR_label, COLOR, -1) == NULL);
-    assert(ENUM_SAFE_ARRAY_ACCESS(COLOR_label, COLOR, COLOR_total) == NULL);
+    // Let's create a local array to test ENUM_SAFE_ARRAY_ACCESS
+    const char* test_arr[4] = { "r", "g", "b", "null" };
+    assert(ENUM_SAFE_ARRAY_ACCESS(test_arr, COLOR, RED) != NULL);
+    assert(ENUM_SAFE_ARRAY_ACCESS(test_arr, COLOR, -1) == NULL);
+    assert(ENUM_SAFE_ARRAY_ACCESS(test_arr, COLOR, COLOR_total) == NULL);
 
     // Test sparse enum validity
     assert(ENUM_IS_VALID(STATUS, OK));

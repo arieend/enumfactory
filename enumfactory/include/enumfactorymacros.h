@@ -56,7 +56,8 @@
 #define ENUM_VALUE_ASSIGN(_1, _2, ...) _1 = _2
 #define ENUM_VALUE_MAP(_1, ...) [(_1)] = ENUM_VALUE_MAP_VAL_(__VA_ARGS__, _1)
 #define ENUM_VALUE_MAP_VAL_(_val, ...) _val
-#define ENUM_STRING_SELF_MAP(_1, ...) [(_1)] = #_1
+#define ENUM_SWITCH_CASE_LABEL_(_1, ...) case _1: return #_1;
+#define ENUM_SWITCH_CASE_VAL_(_1, ...) case _1: return ENUM_VALUE_MAP_VAL_(__VA_ARGS__, _1);
 
 /* Invokers
  * --------
@@ -96,11 +97,11 @@ typedef enum { \
     _enum_name ## _total \
 } _enum_name; \
 static const int _enum_name ## _count = (sizeof((int[]){ _enum_list(_ENUM_VAL_COUNT, 0) 0 }) / sizeof(int)) - 1; \
-static const char* _enum_name ## _label[ _enum_name ## _total ] = { \
-    _enum_list(_X_COMMA, ENUM_STRING_SELF_MAP) \
-}; \
 static inline const char* _enum_name ## _get_label(int value) { \
-    return (value >= 0 && value < _enum_name ## _total) ? _enum_name ## _label[value] : (const char*)0; \
+    switch(value) { \
+        _enum_list(_X_CALL, ENUM_SWITCH_CASE_LABEL_) \
+        default: return (const char*)0; \
+    } \
 }
 
 #define ENUM_TOTAL(_enum) _enum ## _total
@@ -129,11 +130,11 @@ static inline const char* _enum_name ## _get_label(int value) { \
  *            AND a parallel data array in one shot.
  */
 #define ENUMS_ARRAY(_enum_name, _enum_list, _type, _suffix) \
-static const _type _enum_name ## _ ## _suffix[ _enum_name ## _total ] = { \
-    _enum_list(_X_COMMA, ENUM_VALUE_MAP) \
-}; \
 static inline _type _enum_name ## _get_ ## _suffix(int value) { \
-    return (value >= 0 && value < _enum_name ## _total) ? _enum_name ## _ ## _suffix[value] : (_type)0; \
+    switch(value) { \
+        _enum_list(_X_CALL, ENUM_SWITCH_CASE_VAL_) \
+        default: return (_type)0; \
+    } \
 }
 
 #define ENUMS_MAP(_enum_name, _enum_list, _generator, _type, _suffix) \
@@ -146,7 +147,7 @@ ENUMS_ARRAY(_enum_name, _enum_list, _type, _suffix)
  *-----------------------------------------------------------------------------*/
 
 #define ENUM_IS_VALID(_enum, _value) \
-    ((_value) >= 0 && (_value) < ENUM_TOTAL(_enum) && _enum ## _get_label(_value) != (const char*)0)
+    (_enum ## _get_label(_value) != (const char*)0)
 
 #define ENUM_TO_STRING(_enum) \
     static inline const char* _enum ## _get_label(int value) __attribute__((unused)); \
@@ -159,6 +160,6 @@ ENUMS_ARRAY(_enum_name, _enum_list, _type, _suffix)
 #define ENUM_END(_enum) (ENUM_TOTAL(_enum))
 
 #define ENUM_SAFE_ARRAY_ACCESS(_array, _enum, _index) \
-    ((_index >= 0 && _index < ENUM_TOTAL(_enum)) ? _array[_index] : (void*)0)
+    (ENUM_IS_VALID(_enum, _index) ? _array[_index] : (void*)0)
 
 #endif /* __ENUMFACTORYMACROS_H__ */
