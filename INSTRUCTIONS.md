@@ -6,8 +6,8 @@ EnumFactory is a header-only C library (usable in C++) that automates enum gener
 
 ## Key Files
 
-- `enumfactory/include/enumfactorymacros.h`: Core library file.
-- `test/enumfactory_test.c`: Comprehensive test suite and usage examples.
+- `include/enumfactorymacros.h`: Core library file.
+- `tests/enumfactory_test.c`: Comprehensive test suite and usage examples.
 
 ## Coding Guidelines
 

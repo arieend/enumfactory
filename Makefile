@@ -1,18 +1,31 @@
-# Top-level Makefile for enumfactory_test
+# Top-level Makefile for enumfactory static library and tests
 CC=gcc
-CFLAGS=-I./enumfactory/include -Wall -Wextra -O2
-TARGET=enumfactory_test
-SRC=test/enumfactory_test.c
+AR=ar
+CFLAGS=-I./include -Wall -Wextra -O2
+LDFLAGS=-L. -lenumfactory
 
-all: $(TARGET)
+SRCS=src/enumfactory.c
+OBJS=$(SRCS:.c=.o)
+LIB=libenumfactory.a
 
-$(TARGET): $(SRC)
-	$(CC) $(CFLAGS) $(SRC) -o $(TARGET)
+TEST_SRC=tests/enumfactory_test.c
+TEST_BIN=enumfactory_test
 
-test: $(TARGET)
-	./$(TARGET)
+all: $(LIB) $(TEST_BIN)
+
+$(LIB): $(OBJS)
+	$(AR) rcs $@ $^
+
+src/%.o: src/%.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
+$(TEST_BIN): $(TEST_SRC) $(LIB)
+	$(CC) $(CFLAGS) $(TEST_SRC) -o $@ $(LDFLAGS)
+
+test: $(TEST_BIN)
+	./$(TEST_BIN)
 
 clean:
-	rm -f $(TARGET)
+	rm -f $(OBJS) $(LIB) $(TEST_BIN)
 
 .PHONY: all test clean

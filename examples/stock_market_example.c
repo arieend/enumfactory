@@ -23,7 +23,7 @@
  */
 
 #include <stdio.h>
-#include "../enumfactory/include/enumfactorymacros.h"
+#include "../include/enumfactorymacros.h"
 
 /**
  * ----------------------------------------------------------------------------

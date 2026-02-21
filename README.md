@@ -60,8 +60,25 @@ The underlying library macros will pass different generator variants (`G`) to th
 
 ### 1. Installation
 
-As a header-only library, no building or linking steps are required.
-Simply copy and include `enumfactorymacros.h` in your project!
+EnumFactory provides its core functionality via headers, but is architected to be compiled as a static library for larger projects.
+
+1. **Build the Static Library (`libenumfactory.a`)**:
+
+   ```bash
+   make
+   ```
+
+2. **Include the Header**:
+
+   ```c
+   #include "enumfactorymacros.h"
+   ```
+
+3. **Link the Library**:
+   Compile your application linking against the static library:
+   ```bash
+   gcc your_code.c -I./include -L. -lenumfactory -o your_app
+   ```
 
 ### 2. Automatic Array Generation
 
@@ -169,7 +186,7 @@ make test
 make clean
 ```
 
-Tests validate sequential counts, string assignments, multi-variable collision boundaries, and custom parameter limits in `test/enumfactory_test.c`.
+Tests validate sequential counts, string assignments, multi-variable collision boundaries, and custom parameter limits in `tests/enumfactory_test.c`.
 
 ---
 
