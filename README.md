@@ -2,164 +2,182 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-**EnumFactory** is a header-only library (written in C) that provides a powerful and flexible system for generating enums with advanced features, all through the use of preprocessor macros. It automates many of the tedious tasks associated with enums, making your code cleaner, safer, and more maintainable while imposing **zero runtime overhead** for bounds-checking or stringify operations.
+**EnumFactory** is a header-only library (written in C) that provides a powerful and flexible system for generating enumerations coupled with rich metadata (string labels, element counts, parallel arrays, and safe bounds-checking) via C preprocessor metaprogramming.
 
-## Key Features
+It automates many of the tedious chores associated with maintaining enums, making your code cleaner natively while imposing **zero runtime overhead** for bounds-checking or stringify operations.
 
-| Feature                         | Description                                                                                                      |
-| ------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| **Automatic String Conversion** | Easily convert enum members to their string representations without manual `switch` statements.                  |
-| **Value Mapping**               | Create custom maps that associate enum members with specific values (strings or integers).                       |
-| **Multi-Attribute Arrays**      | Automatically generate parallel arrays extracting different values from a single macro definition using indices. |
-| **Type-Safe Access**            | Access enum-related data safely, returning `NULL` or neutral elements on out-of-bounds indices.                  |
-| **Bounds Checking**             | Perform compile-time count evaluations and runtime bounds checks to ensure validity.                             |
-| **Automatic/Assigned Values**   | Supports both automatic enum values (0, 1, 2...) and custom value assignment.                                    |
+---
 
-## Getting Started
+## 🚀 Key Features
 
-### Installation
+| Feature                         | Description                                                                                                       |
+| ------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| **Automatic String Conversion** | Easily convert enum members to their string representations without manual `switch` statements.                   |
+| **Zero Runtime Overhead**       | The generated code natively utilizes compiled Static Jump Tables (`O(1)` operations) for mappings.                |
+| **Multi-Attribute Arrays**      | Automatically generate parallel typed arrays extracting columns from a single macro definition (up to 10 values!) |
+| **Type-Safe Access**            | Access enum-related data safely, returning `NULL` or neutral elements on out-of-bounds invalid integers.          |
+| **Bounds Checking / Ranges**    | Receive compile-time precise count evaluations natively (`sizeof` based) and macro boundaries.                    |
+| **Custom Integer Assignments**  | Supports both automatic enum sequencing (0, 1, 2) and custom value binding (`HTTP_OK = 200`).                     |
 
-Since **EnumFactory** is a header-only library, there's no need for building or linking. Simply include the `enumfactorymacros.h` header file in your project.
+---
 
-### Basic Usage
+## 🧠 How It Works: The "Single Source of Truth"
 
-1. **Define Your Enum Members:** Create a list macro that lists your enum members via the X-Macro pattern. This single macro acts as the single source of truth.
+EnumFactory leverages the **X-Macro technique**.
 
-   ```c
-   #define COLOR_ENUM(X, G) \
-       X(G, RED) \
-       X(G, GREEN) \
-       X(G, BLUE)
-   ```
+Instead of manually maintaining an `enum { ... }` block and a separate `const char* labels[] = { ... }` that inevitably drift out of sync, developers write the definition of an enum once:
 
-2. **Generate the Enum:** Use the `ENUMS_AUTOMATIC`, `ENUMS_ASSIGNED`, or `ENUMS_MAP` macro to generate the enum type and associated lookup functions.
-   - **Automatic Value Assignment:**
+```c
+#define HTTP_STATUS_ENUM(X, G) \
+    X(G, OK, 200)              \
+    X(G, NOT_FOUND, 404)       \
+    X(G, SERVER_ERROR, 500)
+```
 
-     ```c
-     ENUMS_AUTOMATIC(COLOR);
-     ```
+The underlying library macros will pass different generator variants (`G`) to this list to extract identifiers and values without repetition.
 
-   - **Assigned Value Assignment:**
+### Expansion Pipeline Architecture
 
-     ```c
-     #define HTTP_STATUS_ENUM(X, G) \
-         X(G, OK, 200) \
-         X(G, NOT_FOUND, 404) \
-         X(G, ERROR, 500)
+```text
+ +--------------------------+
+ |  HTTP_STATUS_ENUM(X, G)  |  <-- Single Source of Truth
+ +-------------+------------+
+               |
+               v
+ +-------------+-------------+
+ |     GENERATE_ENUM_CORE    |  <-- Injects Extractors (e.g. ENUM_VALUE_ASSIGN)
+ +----+--------+--------+----+
+      |        |        |
+      v        v        v
+   enum{}   _count   _get_label(int value)
+               ^           ^
+   Constant Compile  O(1) Bounds Switch Map
+```
 
-     ENUMS_ASSIGNED(HTTP_STATUS);
-     ```
+---
 
-   - **Parallel Map Generation:**
+## 🛠️ Usage Examples
 
-     ```c
-     #define EVENT_ENUM(X, G) \
-         X(G, CLICK, 100) \
-         X(G, HOVER, 200)
+### 1. Installation
 
-     ENUMS_MAP(EVENT, EVENT_ENUM, ENUM, int, code);
-     // Provides EVENT_get_code(int value) -> returns the mapped 100 or 200
-     ```
+As a header-only library, no building or linking steps are required.
+Simply copy and include `enumfactorymacros.h` in your project!
 
-   - **Multi-Attribute Arrays:**
+### 2. Automatic Array Generation
 
-     ```c
-     #define PRIORITY_ENUM(X, G) \
-         X(G, LOW, 0, 0.1f, "low_priority") \
-         X(G, HIGH, 100, 0.9f, "high_priority")
+Use `ENUMS_AUTOMATIC` to generate incrementing index values.
 
-     ENUMS_ASSIGNED(PRIORITY);
-     ENUMS_ARRAY(PRIORITY, PRIORITY_ENUM, int, score);           // Defaults to index 0
-     ENUMS_ARRAY(PRIORITY, PRIORITY_ENUM, float, rate, 1);       // Extracts index 1
-     ENUMS_ARRAY(PRIORITY, PRIORITY_ENUM, const char*, name, 2); // Extracts index 2
-     ```
+```c
+#include "enumfactorymacros.h"
+#include <stdio.h>
 
-3. **Using the Enum:** Access the generated enum, strings, and safety features.
+// 1. Definition
+#define COLOR_ENUM(X, G) \
+    X(G, RED)   \
+    X(G, GREEN) \
+    X(G, BLUE)
 
-   ```c
-   #include "enumfactorymacros.h"
-   #include <stdio.h>
+// 2. Generation Engine
+ENUMS_AUTOMATIC(COLOR);
 
-   // 1. Definition
-   #define COLOR_ENUM(X, G) \
-       X(G, RED) \
-       X(G, GREEN) \
-       X(G, BLUE)
+// 3. String wrapper macro
+ENUM_TO_STRING(COLOR);
 
-   // 2. Generation
-   ENUMS_AUTOMATIC(COLOR);
-   ENUM_TO_STRING(COLOR); // Optional wrapper to generate `COLOR_to_string`
+int main() {
+    // Zero-overhead string representation
+    printf("Color: %s\n", COLOR_get_label(GREEN)); // Outputs "GREEN"
 
-   int main() {
-       // Accessing the string representations
-       printf("GREEN as string: %s\n", COLOR_get_label(GREEN)); // Output: GREEN
+    // Automatic type-safe bounds checking on C integers!
+    if (ENUM_IS_VALID(COLOR, 15)) {
+        printf("Valid!\n");
+    } else {
+        printf("Invalid Color (not found).\n"); // Runs successfully.
+    }
 
-       // Bounds checking
-       printf("Is RED a valid color? %d\n", ENUM_IS_VALID(COLOR, RED)); // Output: 1
-       printf("Is 99 a valid color? %d\n", ENUM_IS_VALID(COLOR, 99));   // Output: 0
+    // Constant range compilation
+    printf("Defined color count: %d\n", ENUM_COUNT(COLOR)); // Outputs 3
 
-       // Safe array access for parallel structures
-       const char* my_colors[] = { "Red Paint", "Green Paint", "Blue Paint" };
-       const char* safe_val = ENUM_SAFE_ARRAY_ACCESS(my_colors, COLOR, 99);
-       if (!safe_val) {
-           printf("Caught out-of-bounds access safely!\n");
-       }
+    return 0;
+}
+```
 
-       // Count operations (compile-time calculated)
-       printf("Total defined colors: %d\n", ENUM_COUNT(COLOR)); // Output: 3
+### 3. Multi-Attribute Parallel Maps (`ENUMS_ARRAY`)
 
-       return 0;
-   }
-   ```
+Data points often possess multiple pieces of integrated metadata. With recent updates, EnumFactory can map and sequentially extract up to **10 independent attribute arrays** from a single tuple list:
 
-## Available Macros
+```c
+// Define the Single Source of Truth (Macro Name, ID, Price, Class)
+#define PRODUCT_ENUM(X, G) \
+    X(G, LAPTOP, 1, 999.99f, "Computer") \
+    X(G, MOUSE,  2, 49.99f,  "Accessory")
 
-### Generation APIs
+// Generates the enum itself binding values mapped exactly to Index 0
+ENUMS_MAP(PRODUCT, PRODUCT_ENUM, ENUM_VALUE_ASSIGN, int, item_id);
 
-- `ENUMS_AUTOMATIC(_enum_name)`: Generates an enum with automatic values (0, 1, 2, ...) and an inline function `_enum_name_get_label(int)` leveraging jump tables.
-- `ENUMS_ASSIGNED(_enum_name)`: Generates an enum with explicit compiler-assigned values.
-- `ENUMS_ARRAY(_enum_name, _enum_list, _type, _suffix, [index])`: Generates an arbitrary parallel mapping (e.g. enum -> score integers). The `index` parameter is optional (defaults to 0) and dictates which element from the macro tuple to extract (0 to 7).
-- `ENUMS_MAP(_enum_name, _enum_list, _generator, _type, _suffix)`: Generates both the enum and its associated parallel mapping in one shot.
+// Generate isolated map parallel arrays extracting target index columns:
+ENUMS_ARRAY(PRODUCT, PRODUCT_ENUM, float, price, 1);       // Index 1 (Float)
+ENUMS_ARRAY(PRODUCT, PRODUCT_ENUM, const char*, class, 2); // Index 2 (String)
 
-### Constants Generated
+int main() {
+    printf("Laptop ID: #%d\n", PRODUCT_get_item_id(LAPTOP));
+    printf("Laptop Price: $%.2f\n", PRODUCT_get_price(LAPTOP));
+    printf("Laptop Class: %s\n", PRODUCT_get_class(LAPTOP));
+}
+```
 
-Any generation API produces the following constants for `PREFIX_`:
+See `examples/stock_market_example.c` for an advanced demo mapping 10 market variables natively.
 
-- `PREFIX_total`: Range bounding marker (highest value + 1). Use for array allocations.
-- `PREFIX_count`: Actual compiled number of members defined. Use for logic needing the element counts.
+---
+
+## 📖 API Macro Reference
+
+### Generation Core
+
+- `ENUMS_AUTOMATIC(_enum_name)`: Outputs standard enum values (0, 1) and string jump tables.
+- `ENUMS_ASSIGNED(_enum_name)`: Outputs explicit compiler assignments bounded to string conversions.
+- `ENUMS_ARRAY(_enum_name, _enum_list, _type, _suffix, [index])`: Generates parallel maps. `index` parameter (defaults to 0, up to 10) selects the extraction tuple index.
+- `ENUMS_MAP(_enum_name, _enum_list, _generator, _type, _suffix)`: Shorthand to generate both an enum and array map sequentially.
+
+### Generated Endpoints
+
+For any `PREFIX` Enum generated (Substitute `PREFIX` with your enum name):
+
+- `PREFIX_total`: Marker mapping the bounds highest allocated boundary + 1.
+- `PREFIX_count`: Safe `const int` tracking explicitly exact member counts.
+- `PREFIX_get_label(int)`: Bound-safe return of the designated literal string name.
 
 ### Utility Macros
 
-- `ENUM_IS_VALID(_enum, _value)`: Checks if a value strictly matches a defined enum member. Returns a boolean representation.
-- `ENUM_SAFE_ARRAY_ACCESS(_array, _enum, _index)`: Provides safe access to a custom user array, returning `(void*)0` (NULL) if out of bounds.
-- `ENUM_TO_STRING(_enum)`: Wrapper macro to expose an `_to_string()` alias over the generated `_get_label()` function.
+- `ENUM_IS_VALID(_enum, _value)`: Assesses if a raw integer exists functionally within bounds.
+- `ENUM_SAFE_ARRAY_ACCESS(_array, _enum, _index)`: Validates bound limits of an independent mapping array.
 
-## Best Practices: Documentation
+---
 
-When using these macros, it is recommended to add a comment block explaining the generated values, as X-macro expansions can be hard to track for IDEs.
+## 🧪 Building & Testing
 
-Example:
+### Prerequisites
 
-```c
-ENUMS_ASSIGNED(STATUS);
-/*
- * Generated Enum: STATUS
- * -------------------------
- * Type: Assigned
- * Actual Member Count: 3
- * Range (total): 0 to 501 (exclusive)
- *
- * Members & Values:
- * - OK = 200
- * - NOT_FOUND = 404
- * - ERROR = 500
- */
+EnumFactory requires a standard C compiler (like GCC or Clang).
+
+**For Windows Users:** If you don't have native MinGW binaries configured, you can seamlessly test and build the project using **WSL (Windows Subsystem for Linux)**.
+
+```bash
+# Verify the test suite covers all bounds and mappings
+make test
+
+# Clear compilation artifacts
+make clean
 ```
 
-## Contributing
+Tests validate sequential counts, string assignments, multi-variable collision boundaries, and custom parameter limits in `test/enumfactory_test.c`.
 
-Contributions are welcome! If you find any issues or have suggestions for improvements, please open an issue or submit a pull request.
+---
 
-## License
+## 🤝 Contributing
 
-This library is distributed under the MIT License. See `LICENSE` for more information.
+We heartily welcome contributions extending generator limitations, reporting undefined expansion bounds, or enhancing compilation documentation. Please open issues or submit branch pull requests.
+
+## 📄 License
+
+This library is fully distributed under the **MIT License**.
+See `LICENSE` for more information.

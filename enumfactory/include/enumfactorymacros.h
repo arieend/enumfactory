@@ -65,14 +65,24 @@
 #define ENUM_VALUE_MAP_VAL_3(_0, _1, _2, _3, ...) _3
 #define ENUM_VALUE_MAP_VAL_4(_0, _1, _2, _3, _4, ...) _4
 #define ENUM_VALUE_MAP_VAL_5(_0, _1, _2, _3, _4, _5, ...) _5
+#define ENUM_VALUE_MAP_VAL_6(_0, _1, _2, _3, _4, _5, _6, ...) _6
+#define ENUM_VALUE_MAP_VAL_7(_0, _1, _2, _3, _4, _5, _6, _7, ...) _7
+#define ENUM_VALUE_MAP_VAL_8(_0, _1, _2, _3, _4, _5, _6, _7, _8, ...) _8
+#define ENUM_VALUE_MAP_VAL_9(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, ...) _9
+#define ENUM_VALUE_MAP_VAL_10(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, ...) _10
 
 /* Zero padding avoids compiler errors if generators don't have enough arguments */
-#define ENUM_SWITCH_CASE_VAL_0(_1, ...) case _1: return ENUM_VALUE_MAP_VAL_0(__VA_ARGS__, 0, 0, 0, 0, 0, 0);
-#define ENUM_SWITCH_CASE_VAL_1(_1, ...) case _1: return ENUM_VALUE_MAP_VAL_1(__VA_ARGS__, 0, 0, 0, 0, 0, 0);
-#define ENUM_SWITCH_CASE_VAL_2(_1, ...) case _1: return ENUM_VALUE_MAP_VAL_2(__VA_ARGS__, 0, 0, 0, 0, 0, 0);
-#define ENUM_SWITCH_CASE_VAL_3(_1, ...) case _1: return ENUM_VALUE_MAP_VAL_3(__VA_ARGS__, 0, 0, 0, 0, 0, 0);
-#define ENUM_SWITCH_CASE_VAL_4(_1, ...) case _1: return ENUM_VALUE_MAP_VAL_4(__VA_ARGS__, 0, 0, 0, 0, 0, 0);
-#define ENUM_SWITCH_CASE_VAL_5(_1, ...) case _1: return ENUM_VALUE_MAP_VAL_5(__VA_ARGS__, 0, 0, 0, 0, 0, 0);
+#define ENUM_SWITCH_CASE_VAL_0(_1, ...) case _1: return ENUM_VALUE_MAP_VAL_0(__VA_ARGS__, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+#define ENUM_SWITCH_CASE_VAL_1(_1, ...) case _1: return ENUM_VALUE_MAP_VAL_1(__VA_ARGS__, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+#define ENUM_SWITCH_CASE_VAL_2(_1, ...) case _1: return ENUM_VALUE_MAP_VAL_2(__VA_ARGS__, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+#define ENUM_SWITCH_CASE_VAL_3(_1, ...) case _1: return ENUM_VALUE_MAP_VAL_3(__VA_ARGS__, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+#define ENUM_SWITCH_CASE_VAL_4(_1, ...) case _1: return ENUM_VALUE_MAP_VAL_4(__VA_ARGS__, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+#define ENUM_SWITCH_CASE_VAL_5(_1, ...) case _1: return ENUM_VALUE_MAP_VAL_5(__VA_ARGS__, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+#define ENUM_SWITCH_CASE_VAL_6(_1, ...) case _1: return ENUM_VALUE_MAP_VAL_6(__VA_ARGS__, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+#define ENUM_SWITCH_CASE_VAL_7(_1, ...) case _1: return ENUM_VALUE_MAP_VAL_7(__VA_ARGS__, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+#define ENUM_SWITCH_CASE_VAL_8(_1, ...) case _1: return ENUM_VALUE_MAP_VAL_8(__VA_ARGS__, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+#define ENUM_SWITCH_CASE_VAL_9(_1, ...) case _1: return ENUM_VALUE_MAP_VAL_9(__VA_ARGS__, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+#define ENUM_SWITCH_CASE_VAL_10(_1, ...) case _1: return ENUM_VALUE_MAP_VAL_10(__VA_ARGS__, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 
 #define _ENUMS_CONCAT_IMPL(a, b) a ## b
 #define _ENUMS_CONCAT(a, b) _ENUMS_CONCAT_IMPL(a, b)
