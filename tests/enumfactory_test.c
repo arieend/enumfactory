@@ -25,7 +25,7 @@
  * The X-macro pattern is used here. X is the generator, G is the context.
  * When expanded by ENUMS_AUTOMATIC(COLOR):
  * - X becomes ENUM (invokes ENUM(G, RED), etc.)
- * - G becomes the generator argument (e.g., _X_COMMA)
+ * - G becomes the generator argument (e.g., X_COMMA_)
  * result: RED, GREEN, BLUE,
  */
 #define COLOR_ENUM(X, G) \
@@ -137,6 +137,31 @@ ENUM_TO_STRING(PRIORITY);
 ENUMS_MAP(EVENT, EVENT_ENUM, ENUM, int, code);
 ENUM_TO_STRING(EVENT);
 
+/* COLOR_HEX_DATA: associates hex color strings with COLOR enum members.
+ * Used to exercise ENUM_VALUE_MAP, ENUM_VALUE_MAP_VAL_, and ENUM_SWITCH_CASE_VAL_.
+ *
+ * Mappings: RED->"#FF0000", GREEN->"#00FF00", BLUE->"#0000FF"
+ */
+#define COLOR_HEX_DATA(X, G) \
+    X(G, RED,   "#FF0000") \
+    X(G, GREEN, "#00FF00") \
+    X(G, BLUE,  "#0000FF")
+
+/* Exercises ENUM_VALUE_MAP + ENUM_VALUE_MAP_VAL_:
+ * builds a designated-initializer array mapping enum values to strings. */
+static const char* color_hex[COLOR_total] = {
+    COLOR_HEX_DATA(X_COMMA_, ENUM_VALUE_MAP)
+};
+
+/* Exercises ENUM_SWITCH_CASE_VAL_ (non-indexed variant):
+ * builds a switch-based getter equivalent to an ENUMS_ARRAY at index 0. */
+static inline const char* color_hex_get(int value) {
+    switch (value) {
+        COLOR_HEX_DATA(X_CALL_, ENUM_SWITCH_CASE_VAL_)
+        default: return NULL;
+    }
+}
+
 /*
  * Generated Array: STATUS_description
  * -------------------------
@@ -168,10 +193,7 @@ void test_automatic_enum(void) {
     assert(strcmp(COLOR_get_label(GREEN), "GREEN") == 0);
     assert(strcmp(COLOR_get_label(BLUE), "BLUE") == 0);
 
-    assert(strcmp(COLOR_get_label(RED), "RED") == 0);
-    assert(strcmp(COLOR_get_label(RED), "RED") == 0);
-    // Bounds checking test: 99 is invalid, shoud return NULL or empty
-    assert(strcmp(COLOR_get_label(99), "") == 0 || COLOR_get_label(99) == NULL);
+    assert(COLOR_get_label(99) == NULL);
 }
 
 /* Test manually assigned enum values and string mapping
@@ -233,9 +255,7 @@ void test_priority_map(void) {
     assert(PRIORITY_get_rate(99) == 0.0f);
     assert(PRIORITY_get_word(99) == NULL);
     assert(PRIORITY_get_amount(99) == 0);
-}
 
-void test_priority_count(void) {
     assert(PRIORITY_count == 3);
 }
 
@@ -319,16 +339,9 @@ void print_color_values(void) {
 
 void print_status_values(void) {
     printf("STATUS values:\n");
-    // STATUS is sparse, so we iterate through the range but many will be NULL
-    // However, for testing demonstration we can just iterate up to max known or just check specific ones.
-    // Since STATUS_total is 501, iterating all might be verbose if not filtered.
-    // But per request "print all macro values", I will iterate and print valid ones.
-    for (int i = 0; i < STATUS_total; i++) {
-        const char* name = STATUS_to_string(i);
-        if (name) {
-             printf("  %s = %d\n", name, i);
-        }
-    }
+    const int members[] = { OK, NOT_FOUND, ERROR };
+    for (int i = 0; i < STATUS_count; i++)
+        printf("  %s = %d\n", STATUS_to_string(members[i]), members[i]);
 }
 
 void print_priority_values(void) {
@@ -339,6 +352,30 @@ void print_priority_values(void) {
              printf("  %s = %d\n", name, i);
         }
     }
+}
+
+/* Test ENUM_VALUE_MAP, ENUM_VALUE_MAP_VAL_, and ENUM_SWITCH_CASE_VAL_ */
+void test_enum_value_map(void) {
+    assert(strcmp(color_hex[RED],   "#FF0000") == 0);
+    assert(strcmp(color_hex[GREEN], "#00FF00") == 0);
+    assert(strcmp(color_hex[BLUE],  "#0000FF") == 0);
+
+    assert(strcmp(color_hex_get(RED),   "#FF0000") == 0);
+    assert(strcmp(color_hex_get(GREEN), "#00FF00") == 0);
+    assert(strcmp(color_hex_get(BLUE),  "#0000FF") == 0);
+    assert(color_hex_get(99) == NULL);
+}
+
+/* Test ENUM_BEGIN and ENUM_END */
+void test_enum_range(void) {
+    assert(ENUM_BEGIN(COLOR) == 0);
+    assert(ENUM_END(COLOR) == COLOR_total);
+
+    int count = 0;
+    for (int i = ENUM_BEGIN(COLOR); i < ENUM_END(COLOR); i++) {
+        if (ENUM_IS_VALID(COLOR, i)) count++;
+    }
+    assert(count == ENUM_COUNT(COLOR));
 }
 
 /* Main test runner
@@ -360,17 +397,9 @@ int main(void) {
 
     test_fruit_enum();
     printf("Multi-enum collision tests passed\n");
-    
-    print_fruit_values();
-    print_color_values();
-    print_status_values();
-    print_priority_values();
 
     test_priority_map();
     printf("Custom map tests passed\n");
-
-    test_priority_count();
-    printf("Priority count test passed\n");
 
     test_status_description();
     printf("Status description tests passed\n");
@@ -378,6 +407,16 @@ int main(void) {
     test_enums_map();
     printf("ENUMS_MAP tests passed\n");
 
+    test_enum_value_map();
+    printf("ENUM_VALUE_MAP and ENUM_SWITCH_CASE_VAL_ tests passed\n");
+
+    test_enum_range();
+    printf("ENUM_BEGIN/ENUM_END range tests passed\n");
+
+    print_fruit_values();
+    print_color_values();
+    print_status_values();
+    print_priority_values();
 
     printf("All tests passed successfully!\n");
     return 0;
