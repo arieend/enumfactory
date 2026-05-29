@@ -6,18 +6,15 @@
  * DESCRIPTION:
  * This file demonstrates how to use the EnumFactory library to generate
  * advanced Enumerations with associated "Multi-Attribute" properties.
- * 
- * Using a single source of truth (the X-Macro list `STOCK_ENUM`), we 
+ *
+ * Using a single source of truth (the X-Macro list `STOCK_ENUM`), we
  * instruct the library to perform the following:
- * 
+ *
  * 1. Generate an Enum called `STOCK` with assigned values.
- * 2. Generate a count threshold constant (`STOCK_total`) and an item count (`STOCK_count`).
- * 3. Generate parallel data maps representing:
- *      a. The stock's exact ID number.
- *      b. The stock's price (float).
- *      c. The stock's market sector (const char*).
- *      d. The stock's market capitalization in billions (int).
- * 4. Ensure memory safety using the compile-time bounds-checker `ENUM_IS_VALID()`.
+ * 2. Generate a count constant (`STOCK_count`) and range bound (`STOCK_total`).
+ * 3. Generate parallel data maps: price, sector, market cap, dividend yield,
+ *    P/E ratio, EPS, 52-week high/low, beta, and average volume.
+ * 4. Ensure memory safety using `ENUM_IS_VALID()`.
  * 
  * ============================================================================
  */
@@ -52,20 +49,19 @@
  * ----------------------------------------------------------------------------
  * 2. Core Enum & Initialization
  * ----------------------------------------------------------------------------
- * Since our X-Macro generator `STOCK_ENUM` supplies explicitly assigned ID 
- * values (1, 2, 3...) as the first parameter after the identifier, we use 
- * `ENUM_VALUE_ASSIGN` to bind these IDs directly to the enum members.
- * 
- * We also simultaneously map the ID Value array (index 0) using ENUMS_MAP.
- * 
- * Generates: `enum STOCK` and `int STOCK_get_id(int value)`
+ * `STOCK_ENUM` supplies explicitly assigned values (1, 2, 3...) as the first
+ * parameter after each identifier. `ENUMS_ASSIGNED` binds these to the enum
+ * members via `ENUM_VALUE_ASSIGN`.
+ *
+ * Generates: `enum STOCK` with AAPL=1 .. TSM=10, plus `STOCK_count` and
+ * `STOCK_get_label`.
  */
-ENUMS_MAP(STOCK, STOCK_ENUM, ENUM_VALUE_ASSIGN, int, id);
+ENUMS_ASSIGNED(STOCK);
 
 /*
  * Generated Enum: STOCK
  * -------------------------
- * Type: Map (Enum and Multi-Attribute Arrays)
+ * Type: Assigned
  * Actual Member Count: 10
  * Range (total): 0 to 11 (exclusive)
  *
@@ -139,7 +135,7 @@ ENUM_TO_STRING(STOCK);
  * Execution & Validation
  * ----------------------------------------------------------------------------
  */
-int main() {
+int main(void) {
     printf("\n=== Top 10 Stock Market Report ===\n");
     printf("--------------------------------------------------------------------------------------------------------------------------------------\n");
     printf("%-10s | %-5s | %-8s | %-18s | %-10s | %-6s | %-7s | %-6s | %-8s | %-8s | %-5s | %-12s\n", 
@@ -169,7 +165,7 @@ int main() {
          */
         printf("%-10s | %-5d | $%-7.2f | %-18s | $%d B      | %-5.2f%% | %-7.1f | $%-5.2f | $%-7.2f | $%-7.2f | %-5.2f | %d\n",
             STOCK_to_string(i),
-            STOCK_get_id(i),
+            i,
             STOCK_get_price(i),
             STOCK_get_sector(i),
             STOCK_get_mcap(i),
