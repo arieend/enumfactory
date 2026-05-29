@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(Get-ChildItem -Path C:\\\\Dev\\\\enumfactory -Force)",
+      "Bash(Select-Object Name, PSIsContainer)",
+      "Bash(make test *)",
+      "Bash(where cl *)",
+      "Bash(where clang *)",
+      "Bash(where gcc *)",
+      "Bash(Get-Command gcc,clang,cl -ErrorAction SilentlyContinue)",
+      "Bash(Select-Object Name,Source)",
+      "PowerShell(Test-Path *)",
+      "PowerShell(make test *)",
+      "PowerShell(make *)",
+      "PowerShell(gcc *)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)"
+    ]
+  }
+}
