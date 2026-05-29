@@ -27,15 +27,13 @@
  */
 
 #pragma once
-#ifndef __ENUMFACTORYMACROS_H__
-#define __ENUMFACTORYMACROS_H__
 
 /*-----------------------------------------------------------------------------
  * Base Enum Generation Macros
  * These macros form the foundation of enum member generation
  *-----------------------------------------------------------------------------*/
 
-/* Core Generators (No trailing commas) 
+/* Core Generators (No trailing commas)
  * -------------------------------------
  * These macros act as the "visitor" logic for each X-Macro expansion.
  *
@@ -49,8 +47,9 @@
  *       _1 is the enum key, VA_ARGS is the value.
  *       Example expansion: [RED] = "FF0000"
  *
- * ENUM_STRING_SELF_MAP: Generates a string mapping of the identifier itself.
- *       Example expansion: [RED] = "RED"
+ * ENUM_SWITCH_CASE_VAL_: Switch-case generator extracting the first variadic
+ *       argument. Equivalent to ENUM_SWITCH_CASE_VAL_0.
+ *       Example expansion: case RED: return "FF0000";
  */
 #define ENUM(_1, ...) _1
 #define ENUM_VALUE_ASSIGN(_1, _2, ...) _1 = _2
@@ -84,50 +83,47 @@
 #define ENUM_SWITCH_CASE_VAL_9(_1, ...) case _1: return ENUM_VALUE_MAP_VAL_9(__VA_ARGS__, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 #define ENUM_SWITCH_CASE_VAL_10(_1, ...) case _1: return ENUM_VALUE_MAP_VAL_10(__VA_ARGS__, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 
-#define _ENUMS_CONCAT_IMPL(a, b) a ## b
-#define _ENUMS_CONCAT(a, b) _ENUMS_CONCAT_IMPL(a, b)
+#define ENUMS_CONCAT_IMPL_(a, b) a ## b
+#define ENUMS_CONCAT_(a, b) ENUMS_CONCAT_IMPL_(a, b)
 
 /* Invokers
  * --------
  * These helper macros control how the generator list is expanded.
  *
- * _X_COMMA: Appends a comma after the generator call.
+ * X_COMMA_: Appends a comma after the generator call.
  *           Used inside enum definitions where members are comma-separated.
  *           Example: RED, GREEN, BLUE,
  *
- * _ENUM_VAL_COUNT: Returns 1 for each item, used for counting members.
+ * ENUM_VAL_COUNT_: Returns 1 for each item, used for counting members.
  */
-#define _X_CALL(_gen, ...) _gen(__VA_ARGS__)
-#define _X_COMMA(_gen, ...) _gen(__VA_ARGS__),
-#define _ENUM_VAL_COUNT(_1, ...) 1,
+#define X_CALL_(_gen, ...) _gen(__VA_ARGS__)
+#define X_COMMA_(_gen, ...) _gen(__VA_ARGS__),
+#define ENUM_VAL_COUNT_(_1, ...) 1,
 
 /* Unified Generation Macro
  * ------------------------
- * This is the heart of the library. It produces 4 artifacts for every enum:
+ * This is the heart of the library. It produces 3 artifacts for every enum:
  *
  * 1. The Enum Type definition (typedef enum { ... } Name;)
- *    - Uses _X_COMMA with the provided generator to list members.
+ *    - Uses X_COMMA_ with the provided generator to list members.
  *    - Appends a _total member at the end to track range.
  *
  * 2. Members Count (_count)
  *    - A static const int that holds the actual number of defined items.
  *
- * 3. Label Array (_label)
- *    - An array of string literals mapping value -> identifier name.
- *    - Used for automatic to-string conversion.
- *
- * 4. Safe Label Accessor (_get_label)
- *    - A function to safely retrieve the label, returning NULL if out of bounds.
+ * 3. Safe Label Accessor (_get_label)
+ *    - A function to safely retrieve the string label of a value,
+ *      returning NULL if out of bounds.
  */
 #define GENERATE_ENUM_CORE(_enum_name, _enum_list, _generator) \
 typedef enum { \
-    _enum_list(_X_COMMA, _generator) \
+    _enum_list(X_COMMA_, _generator) \
     _enum_name ## _total \
 } _enum_name; \
-static const int _enum_name ## _count = (sizeof((int[]){ _enum_list(_ENUM_VAL_COUNT, 0) 0 }) / sizeof(int)) - 1; \
+static const int _enum_name ## _count = (sizeof((int[]){ _enum_list(ENUM_VAL_COUNT_, 0) 0 }) / sizeof(int)) - 1; \
 static inline const char* _enum_name ## _get_label(int value) { \
     switch(value) { \
-        _enum_list(_X_CALL, ENUM_SWITCH_CASE_LABEL_) \
+        _enum_list(X_CALL_, ENUM_SWITCH_CASE_LABEL_) \
         default: return (const char*)0; \
     } \
 }
@@ -151,33 +147,33 @@ static inline const char* _enum_name ## _get_label(int value) { \
  * ----------------------------------
  * These macros generate parallel arrays based on the enum structure.
  *
- * ENUMS_ARRAY: Generates a lookup array for an existing map of values.
+ * ENUMS_ARRAY: Generates a lookup function for an existing map of values.
  *              Used when you want to map Enum -> Arbitrary Data.
  *              Accepts an optional 5th argument specifying the column/index
- *              within the generator macro tuple to extract (0-7, defaults to 0).
+ *              within the generator macro tuple to extract (0-10, defaults to 0).
  *
  * ENUMS_MAP: A convenience wrapper that generates both the core enum
  *            AND a parallel data array in one shot.
  */
-#define _ENUMS_ARRAY_IMPL(_enum_name, _enum_list, _type, _suffix, _index) \
+#define ENUMS_ARRAY_IMPL_(_enum_name, _enum_list, _type, _suffix, _index) \
 static inline _type _enum_name ## _get_ ## _suffix(int value) { \
     switch(value) { \
-        _enum_list(_X_CALL, _ENUMS_CONCAT(ENUM_SWITCH_CASE_VAL_, _index)) \
+        _enum_list(X_CALL_, ENUMS_CONCAT_(ENUM_SWITCH_CASE_VAL_, _index)) \
         default: return (_type)0; \
     } \
 }
 
-#define _ENUMS_ARRAY_4(enum_name, enum_list, type, suffix) \
-    _ENUMS_ARRAY_IMPL(enum_name, enum_list, type, suffix, 0)
+#define ENUMS_ARRAY_4_(enum_name, enum_list, type, suffix) \
+    ENUMS_ARRAY_IMPL_(enum_name, enum_list, type, suffix, 0)
 
-#define _ENUMS_ARRAY_5(enum_name, enum_list, type, suffix, index) \
-    _ENUMS_ARRAY_IMPL(enum_name, enum_list, type, suffix, index)
+#define ENUMS_ARRAY_5_(enum_name, enum_list, type, suffix, index) \
+    ENUMS_ARRAY_IMPL_(enum_name, enum_list, type, suffix, index)
 
-#define _ENUMS_ARRAY_GET_MACRO(_1, _2, _3, _4, _5, NAME, ...) NAME
+#define ENUMS_ARRAY_GET_MACRO_(_1, _2, _3, _4, _5, NAME, ...) NAME
 
 /* ENUMS_ARRAY accepts either 4 args (defaults to index 0) or 5 args (explicit index) */
 #define ENUMS_ARRAY(...) \
-    _ENUMS_ARRAY_GET_MACRO(__VA_ARGS__, _ENUMS_ARRAY_5, _ENUMS_ARRAY_4)(__VA_ARGS__)
+    ENUMS_ARRAY_GET_MACRO_(__VA_ARGS__, ENUMS_ARRAY_5_, ENUMS_ARRAY_4_)(__VA_ARGS__)
 
 #define ENUMS_MAP(_enum_name, _enum_list, _generator, _type, _suffix) \
 GENERATE_ENUM_CORE(_enum_name, _enum_list, _generator) \
@@ -192,8 +188,6 @@ ENUMS_ARRAY(_enum_name, _enum_list, _type, _suffix)
     (_enum ## _get_label(_value) != (const char*)0)
 
 #define ENUM_TO_STRING(_enum) \
-    static inline const char* _enum ## _get_label(int value) __attribute__((unused)); \
-    static inline const char* _enum ## _to_string(int value) __attribute__((unused)); \
     static inline const char* _enum ## _to_string(int value) { \
         return _enum ## _get_label(value); \
     }
@@ -201,7 +195,6 @@ ENUMS_ARRAY(_enum_name, _enum_list, _type, _suffix)
 #define ENUM_BEGIN(_enum) ((int)0)
 #define ENUM_END(_enum) (ENUM_TOTAL(_enum))
 
+/* Only valid for pointer-type arrays; returns NULL for out-of-bounds indices. */
 #define ENUM_SAFE_ARRAY_ACCESS(_array, _enum, _index) \
-    (ENUM_IS_VALID(_enum, _index) ? _array[_index] : (void*)0)
-
-#endif /* __ENUMFACTORYMACROS_H__ */
+    (ENUM_IS_VALID(_enum, _index) ? _array[_index] : NULL)
