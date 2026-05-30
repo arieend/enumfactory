@@ -29,7 +29,7 @@ _Note: Do not use trailing commas or semicolons inside the macro definition._
 
 - `ENUMS_AUTOMATIC(NAME)`: Generates `enum NAME` with sequential values (0, 1, ...).
 - `ENUMS_ASSIGNED(NAME)`: Generates `enum NAME` with explicit values.
-- `ENUMS_ARRAY(NAME, ENUM_LIST, MAP_TYPE, SUFFIX, [INDEX])`: Generates a parallel function mapping `NAME_get_<SUFFIX>(int value)`. Takes an optional 5th parameter `INDEX` (0-7, defaults to 0) to extract specific attribute columns.
+- `ENUMS_ARRAY(NAME, ENUM_LIST, MAP_TYPE, SUFFIX, [INDEX])`: Generates a parallel function mapping `NAME_get_<SUFFIX>(int value)`. Takes an optional 5th parameter `INDEX` (0-10, defaults to 0) to extract specific attribute columns.
 - `ENUMS_MAP(NAME, ENUM_LIST, GENERATOR, MAP_TYPE, SUFFIX)`: Generates both `enum NAME` and a parallel function mapping `NAME_get_<SUFFIX>(int value)`.
   **Example:**
 

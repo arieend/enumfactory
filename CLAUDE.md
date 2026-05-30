@@ -59,6 +59,13 @@ Tuple attributes beyond the name/value are extracted by position with `ENUMS_ARR
 - `ENUM_TOTAL(NAME)` — highest value + 1 (use for range iteration, not count)
 - `ENUM_SAFE_ARRAY_ACCESS(array, enum, index)` — bounds-checked array index
 
+## Gotchas
+
+- **Windows PATH**: `make` fails with "CreateProcess failed" if msys2 isn't in PATH. Fix: `$env:PATH = "C:\msys64\mingw64\bin;$env:PATH"`
+- **`ENUMS_AUTOMATIC` naming**: Token-pastes `_ENUM` onto the name — the list macro **must** be `NAME_ENUM(X,G)`. Any other suffix (e.g., `NAME_DATA`) silently generates nothing.
+- **`ENUMS_ARRAY` index 0**: Extracts the *first extra attribute* after the name/value. For `ENUM_VALUE_ASSIGN` lists, index 0 is the assigned integer (= the enum value itself) — use index 1+ for actual data attributes.
+- **`ENUMS_MAP` + `ENUM_VALUE_ASSIGN`**: Index 0 returns the assigned integer cast to the declared type; rarely useful for string extraction. Prefer `ENUMS_ASSIGNED` + `ENUMS_ARRAY` at index 1+.
+
 ## Coding Rules (from INSTRUCTIONS.md)
 
 1. **Comment block required**: Whenever you generate an enum with a macro, add a comment documenting the generated members and their values. Macros hide definitions so this is essential for readability.

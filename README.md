@@ -481,7 +481,7 @@ printf("%s\n", hex[GREEN]);  // #00FF00
 
 This is useful when you need a plain array (e.g. to pass to a function expecting `const char**`) rather than a getter function. Unlike `ENUMS_ARRAY`, it uses designated initializers so sparse enum values are handled correctly — unoccupied indices are zero-initialized by C99 rules.
 
-> **Note:** `X_COMMA_` is an internal library macro used here directly. This is the one case where an internal name appears in user code. A future release may provide a cleaner public wrapper.
+> **Note:** `X_COMMA_` and `X_CALL_` are public library helpers, following the `NAME_` trailing-underscore naming convention. They are designed for direct use in user code.
 
 ---
 
@@ -618,6 +618,8 @@ make clean    # removes build artifacts
 ```
 
 Compiler: GCC with `-Wall -Wextra -O2`. The library has no dependencies beyond the C standard library.
+
+**Windows (MSYS2):** If `make` fails with "CreateProcess failed", GCC is not in PATH. Fix: `$env:PATH = "C:\msys64\mingw64\bin;$env:PATH"`
 
 ---
 
