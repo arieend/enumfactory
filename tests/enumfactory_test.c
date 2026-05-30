@@ -339,9 +339,9 @@ void print_color_values(void) {
 
 void print_status_values(void) {
     printf("STATUS values:\n");
-    const int members[] = { OK, NOT_FOUND, ERROR };
-    for (int i = 0; i < STATUS_count; i++)
-        printf("  %s = %d\n", STATUS_to_string(members[i]), members[i]);
+#define PRINT_STATUS_(name, val, ...) printf("  " #name " = %d\n", val);
+    STATUS_ENUM(X_CALL_, PRINT_STATUS_)
+#undef PRINT_STATUS_
 }
 
 void print_priority_values(void) {

@@ -28,6 +28,8 @@
 
 #pragma once
 
+#include <stddef.h>
+
 /*-----------------------------------------------------------------------------
  * Base Enum Generation Macros
  * These macros form the foundation of enum member generation
@@ -124,7 +126,7 @@ static const int _enum_name ## _count = (sizeof((int[]){ _enum_list(ENUM_VAL_COU
 static inline const char* _enum_name ## _get_label(int value) { \
     switch(value) { \
         _enum_list(X_CALL_, ENUM_SWITCH_CASE_LABEL_) \
-        default: return (const char*)0; \
+        default: return NULL; \
     } \
 }
 
@@ -185,7 +187,7 @@ ENUMS_ARRAY(_enum_name, _enum_list, _type, _suffix)
  *-----------------------------------------------------------------------------*/
 
 #define ENUM_IS_VALID(_enum, _value) \
-    (_enum ## _get_label(_value) != (const char*)0)
+    (_enum ## _get_label(_value) != NULL)
 
 #define ENUM_TO_STRING(_enum) \
     static inline const char* _enum ## _to_string(int value) { \
